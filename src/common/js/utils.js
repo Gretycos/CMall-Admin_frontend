@@ -10,6 +10,14 @@ export const setLocal = (name, value) => {
     localStorage.setItem(name, value)
 }
 
+export const removeLocal = (name) => {
+    localStorage.removeItem(name)
+}
+
+export const uploadImgServer = 'http://127.0.0.1:8080/admin/upload/file'
+
+export const uploadImgsServer = 'http://127.0.0.1:8080/admin/upload/files'
+
 export const pathMap = {
     login: '登录',
     introduce: '系统介绍',

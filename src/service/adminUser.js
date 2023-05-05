@@ -20,6 +20,6 @@ export function editName(params) {
     return axios.put('/adminUser/name', params)
 }
 
-export function logout() {
+export function logoutAdmin() {
     return axios.delete('/adminUser/logout')
 }
