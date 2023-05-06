@@ -9,17 +9,12 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            redirect: '/introduce'
-        },
-        {
-            path: '/introduce',
-            name: 'introduce',
-            component: () => import(/* webpackChunkName: "introduce" */ '../views/Introduce.vue')
+            redirect: '/dashboard'
         },
         {
             path: '/dashboard',
             name: 'dashboard',
-            component: () => import(/* webpackChunkName: "dashboard" */ '../views/Index.vue')
+            component: () => import(/* webpackChunkName: "introduce" */ '../views/Statistic.vue')
         },
         {
             path: '/login',
@@ -32,24 +27,24 @@ const router = createRouter({
             component: () => import(/* webpackChunkName: "add" */ '../views/AddGoods.vue')
         },
         {
-            path: '/swiper',
-            name: 'swiper',
-            component: () => import(/* webpackChunkName: "swiper" */ '../views/Swiper.vue')
+            path: '/carousel',
+            name: 'carousel',
+            component: () => import(/* webpackChunkName: "swiper" */ '../views/Carousel.vue')
         },
         {
             path: '/hot',
             name: 'hot',
-            component: () => import(/* webpackChunkName: "hot" */ '../views/IndexConfig.vue')
+            component: () => import(/* webpackChunkName: "hot" */ '../views/HomepageConfig.vue')
         },
         {
             path: '/new',
             name: 'new',
-            component: () => import(/* webpackChunkName: "new" */ '../views/IndexConfig.vue')
+            component: () => import(/* webpackChunkName: "new" */ '../views/HomepageConfig.vue')
         },
         {
             path: '/recommend',
             name: 'recommend',
-            component: () => import(/* webpackChunkName: "recommend" */ '../views/IndexConfig.vue')
+            component: () => import(/* webpackChunkName: "recommend" */ '../views/HomepageConfig.vue')
         },
         {
             path: '/category',

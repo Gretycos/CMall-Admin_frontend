@@ -4,7 +4,7 @@
  */
 import axios from "@/common/js/axios.js";
 
-export function getCarousel(params) {
+export function getCarouselList(params) {
     return axios.get('/carousels', {params})
 }
 
