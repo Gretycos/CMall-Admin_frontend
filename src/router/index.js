@@ -29,7 +29,7 @@ const router = createRouter({
         {
             path: '/add',
             name: 'add',
-            component: () => import(/* webpackChunkName: "add" */ '../views/AddGood.vue')
+            component: () => import(/* webpackChunkName: "add" */ '../views/AddGoods.vue')
         },
         {
             path: '/swiper',
@@ -69,9 +69,9 @@ const router = createRouter({
             ]
         },
         {
-            path: '/good',
-            name: 'good',
-            component: () => import(/* webpackChunkName: "new" */ '../views/Good.vue')
+            path: '/goods',
+            name: 'goods',
+            component: () => import(/* webpackChunkName: "new" */ '../views/Goods.vue')
         },
         {
             path: '/guest',

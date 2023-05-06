@@ -4,7 +4,7 @@
  */
 import axios from "@/common/js/axios"
 
-export function getCategory(params) {
+export function getCategoryList(params) {
     return axios.get('/categories', {params})
 }
 
