@@ -10,7 +10,7 @@ import router from '@/router'
 
 console.log('import.meta.env', import.meta.env)
 
-axios.defaults.baseURL = import.meta.env.MODE === 'development' ? '127.0.0.1:8080/admin' : ''
+axios.defaults.baseURL = import.meta.env.MODE === 'development' ? '/api' : ''
 axios.defaults.withCredentials = true
 axios.defaults.headers['X-Requested-With'] = 'XMLHttpRequest'
 axios.defaults.headers['token'] = getLocal('token') || ''
@@ -21,6 +21,8 @@ axios.interceptors.response.use(res => {
         ElMessage.error('服务端异常！')
         return Promise.reject(res)
     }
+    console.log('服务器返回数据: ')
+    console.log(res.data)
     if (res.data.resultCode !== 200) {
         if (res.data.message) ElMessage.error(res.data.message)
         if (res.data.resultCode === 419) {

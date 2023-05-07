@@ -19,7 +19,7 @@
                     </div>
                 </template>
                 <div class="nickname">
-                    <p>登录名：{{ state.userInfo && state.userInfo.loginUserName || '' }}</p>
+                    <p>账号：{{ state.userInfo && state.userInfo.loginUserName || '' }}</p>
                     <p>昵称：{{ state.userInfo && state.userInfo.nickName || '' }}</p>
                     <el-tag size="small" effect="dark" class="logout" @click="logout">退出</el-tag>
                 </div>
@@ -32,7 +32,7 @@
 import { onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import {getProfile, logoutAdmin} from "@/service/adminUser.js";
-import {pathMap, removeLocal} from "@/common/js/utils.js";
+import {getLocal, pathMap, removeLocal} from "@/common/js/utils.js";
 
 const router = useRouter()
 const state = reactive({
@@ -44,7 +44,7 @@ const state = reactive({
 // 初始化执行方法
 onMounted(() => {
     const pathName = window.location.hash.split('/')[1] || ''
-    if (!['login'].includes(pathName)) {
+    if (getLocal('token') && !['login'].includes(pathName)) {
         getUserInfo()
     }
 })

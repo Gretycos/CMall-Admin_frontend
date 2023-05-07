@@ -1,7 +1,7 @@
 <template>
     <div class="add">
         <el-card class="add-container">
-            <el-form :model="state.goodsForm" :rules="state.rules" ref="goodRef" label-width="100px" class="goodForm">
+            <el-form :model="state.goodsForm" :rules="state.rules" ref="goodsRef" label-width="100px" class="goodsForm">
                 <el-form-item required label="商品分类">
                     <el-cascader :placeholder="state.defaultCate" style="width: 300px" :props="state.category" @change="handleChangeCate"></el-cascader>
                 </el-form-item>
@@ -23,8 +23,8 @@
                 <el-form-item label="商品标签" prop="tag">
                     <el-input style="width: 300px" v-model="state.goodsForm.tag" placeholder="请输入商品小标签"></el-input>
                 </el-form-item>
-                <el-form-item label="上架状态" prop="goodsSellStatus">
-                    <el-radio-group v-model="state.goodsForm.goodsSellStatus">
+                <el-form-item label="上架状态" prop="goodsSaleStatus">
+                    <el-radio-group v-model="state.goodsForm.goodsSaleStatus">
                         <el-radio label="0">上架</el-radio>
                         <el-radio label="1">下架</el-radio>
                     </el-radio-group>
@@ -62,13 +62,13 @@ import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import {getLocal, uploadImgServer, uploadImgsServer} from "@/common/js/utils.js";
 import {getCategoryList} from "@/service/category.js";
-import WangEditor from "wangeditor/src/wangEditor.js";
+import WangEditor from "wangeditor";
 import {addGoods, editGoods, getGoodsDetail} from "@/service/goods.js";
 
 const { proxy } = getCurrentInstance()
 let instance
 const editor = ref(null)
-const goodRef = ref(null)
+const goodsRef = ref(null)
 const route = useRoute()
 const router = useRouter()
 const { id } = route.query
@@ -83,7 +83,7 @@ const state = reactive({
         originalPrice: '',
         sellingPrice: '',
         stockNum: '',
-        goodsSellStatus: '0',
+        goodsSaleStatus: '0',
         goodsCoverImg: '',
         tag: ''
     },
@@ -104,7 +104,7 @@ const state = reactive({
     categoryId: '',
     category: {
         lazy: true,
-        lazyLoad(node, resolve) {
+        async lazyLoad (node, resolve) {
             const { level = 0, value } = node
             const params = {
                 pageNumber: 1,
@@ -112,7 +112,7 @@ const state = reactive({
                 categoryLevel: level + 1,
                 parentId: value || 0
             }
-            const {data} = getCategoryList(params)
+            const {data} = await getCategoryList(params)
             const list = data.list
             const nodes = list.map(item => ({
                 value: item.categoryId,
@@ -163,7 +163,7 @@ onMounted(async () => {
             originalPrice: goods.originalPrice,
             sellingPrice: goods.sellingPrice,
             stockNum: goods.stockNum,
-            goodsSellStatus: String(goods.goodsSellStatus),
+            goodsSaleStatus: String(goods.goodsSaleStatus),
             goodsCoverImg: proxy.$filters.prefix(goods.goodsCoverImg),
             tag: goods.tag
         }
@@ -182,19 +182,19 @@ onBeforeUnmount(() => {
 })
 
 const submitAdd = () => {
-    goodRef.value.validate(async (valid) => {
+    goodsRef.value.validate(async (valid) => {
         if (valid){
             let params = {
                 goodsCategoryId: state.categoryId,
-                goodsCoverImg: state.goodForm.goodsCoverImg,
+                goodsCoverImg: state.goodsForm.goodsCoverImg,
                 goodsDetailContent: instance.txt.html(),
-                goodsIntro: state.goodForm.goodsIntro,
-                goodsName: state.goodForm.goodsName,
-                goodsSellStatus: state.goodForm.goodsSellStatus,
-                originalPrice: state.goodForm.originalPrice,
-                sellingPrice: state.goodForm.sellingPrice,
-                stockNum: state.goodForm.stockNum,
-                tag: state.goodForm.tag
+                goodsIntro: state.goodsForm.goodsIntro,
+                goodsName: state.goodsForm.goodsName,
+                goodsSaleStatus: state.goodsForm.goodsSaleStatus,
+                originalPrice: state.goodsForm.originalPrice,
+                sellingPrice: state.goodsForm.sellingPrice,
+                stockNum: state.goodsForm.stockNum,
+                tag: state.goodsForm.tag
             }
             if (id){
                 params.goodsId = id
@@ -204,7 +204,7 @@ const submitAdd = () => {
                 await addGoods(params)
                 ElMessage.success('添加成功')
             }
-            router.push({ path: '/goods' })
+            await router.push({path: '/goods'})
         }
     })
 }
@@ -218,7 +218,7 @@ const handleBeforeUpload = (file) => {
 }
 
 const handleUrlSuccess = (val) => {
-    state.goodForm.goodsCoverImg = val.data || ''
+    state.goodsForm.goodsCoverImg = val.data || ''
 }
 
 const handleChangeCate = (val) => {

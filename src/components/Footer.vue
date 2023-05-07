@@ -1,6 +1,6 @@
 <template>
     <div class="footer">
-        <div class="left">Copyright © 2023-2023 Tsong. All rights reserved.</div>
+        <div class="left">Copyright © 2023 Tsong. All rights reserved.</div>
         <div class="right">
             <a target="_blank" href="https://github.com/Gretycos/cmall-admin_frontend">CMall-Admin Version 1.0.0</a>
         </div>

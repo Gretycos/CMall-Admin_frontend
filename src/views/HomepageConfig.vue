@@ -16,7 +16,7 @@
             </div>
         </template>
         <el-table
-                :load="state.loading"
+                v-loading="state.loading"
                 ref="multipleTable"
                 :data="state.tableData"
                 tooltip-effect="dark"

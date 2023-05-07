@@ -1,7 +1,7 @@
 {
   "name": "cmall-admin",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.1.0",
     "axios": "^1.4.0",
     "element-plus": "^2.3.4",
     "js-md5": "^0.7.3",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.1.0",
+    "sass": "^1.62.1",
     "unplugin-auto-import": "^0.15.3",
     "unplugin-element-plus": "^0.7.1",
     "vite": "^4.2.0"

@@ -3,6 +3,7 @@
  * time: 2023/5/4 15:27
  */
 import { createRouter, createWebHashHistory } from 'vue-router'
+import {getLocal} from "@/common/js/utils.js";
 
 const router = createRouter({
     history: createWebHashHistory(), // hash模式：createWebHashHistory，history模式：createWebHistory
@@ -12,14 +13,14 @@ const router = createRouter({
             redirect: '/dashboard'
         },
         {
-            path: '/dashboard',
-            name: 'dashboard',
-            component: () => import(/* webpackChunkName: "introduce" */ '../views/Statistic.vue')
-        },
-        {
             path: '/login',
             name: 'login',
             component: () => import(/* webpackChunkName: "login" */ '../views/Login.vue')
+        },
+        {
+            path: '/dashboard',
+            name: 'dashboard',
+            component: () => import(/* webpackChunkName: "introduce" */ '../views/Statistic.vue')
         },
         {
             path: '/add',
@@ -89,6 +90,17 @@ const router = createRouter({
             component: () => import(/* webpackChunkName: "account" */ '../views/Account.vue')
         }
     ]
+})
+
+router.beforeEach((to, from, next) => {
+    console.log(to)
+    if (!getLocal('token') && to.path !== '/login'){
+        console.log('去登录界面')
+        next({path: '/login'})
+    } else {
+        console.log('去下个界面')
+        next()
+    }
 })
 
 export default router

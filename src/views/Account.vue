@@ -1,8 +1,8 @@
 <template>
     <el-card class="account-container">
         <el-form :model="state.nameForm" :rules="state.rules" ref="nameRef" label-width="80px" label-position="right" class="demo-ruleForm">
-            <el-form-item label="登录名：" prop="loginName">
-                <el-input style="width: 200px" v-model="state.nameForm.loginName"></el-input>
+            <el-form-item label="账号：" prop="loginName">
+                <el-input style="width: 200px" v-model="state.nameForm.loginName" disabled></el-input>
             </el-form-item>
             <el-form-item label="昵称：" prop="nickName">
                 <el-input style="width: 200px" v-model="state.nameForm.nickName"></el-input>
@@ -85,6 +85,10 @@ const submitName = () => {
 const submitPass = () => {
     passRef.value.validate(async (valid) => {
         if (valid){
+            if (state.passForm.oldPass === state.passForm.newPass){
+                ElMessage.error('新旧密码不能相同')
+                return
+            }
             const params = {
                 originalPassword: md5(state.passForm.oldPass),
                 newPassword: md5(state.passForm.newPass)

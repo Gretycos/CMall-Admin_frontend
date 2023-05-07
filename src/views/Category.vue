@@ -16,7 +16,7 @@
             </div>
         </template>
         <el-table
-                :load="state.loading"
+                v-loading="state.loading"
                 ref="multipleTable"
                 :data="state.tableData"
                 tooltip-effect="dark"
@@ -83,7 +83,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Plus, Delete } from '@element-plus/icons-vue'
 import {deleteCategory, getCategoryList} from "@/service/category.js";
-import {DialogCategory} from "@/components/DialogCategory.vue";
+import DialogCategory from "@/components/DialogCategory.vue";
+import {convertTimeStamp} from '@/common/js/utils.js'
 
 const dialogCate = ref(null)
 const router = useRouter() // 声明路由实例
@@ -130,6 +131,10 @@ const getCategory = async () => {
         parentId: parent_id
     }
     const {data} = await getCategoryList(params)
+    data.list.forEach(e => {
+        e.createTime = convertTimeStamp(e.createTime, 'YYYY-MM-DD hh:mm:ss')
+        e.updateTime = convertTimeStamp(e.updateTime, 'YYYY-MM-DD hh:mm:ss')
+    })
     state.tableData = data.list
     state.total = data.totalCount
     state.currentPage = data.currPage

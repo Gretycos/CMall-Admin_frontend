@@ -4,8 +4,8 @@
             <el-aside class="aside">
                 <div class="head">
                     <div>
-                        <img src="//s.weituibao.com/1582958061265/mlogo.png" alt="logo">
-                        <span>vue3 admin</span>
+                        <img src="@/assets/cmall-logo.png" alt="logo">
+                        <span>ADMIN</span>
                     </div>
                 </div>
                 <div class="line" />
@@ -30,7 +30,7 @@
                             <span>首页配置</span>
                         </template>
                         <el-menu-item-group>
-                            <el-menu-item index="/swiper"><el-icon><Picture /></el-icon>轮播图配置</el-menu-item>
+                            <el-menu-item index="/carousel"><el-icon><Picture /></el-icon>轮播图配置</el-menu-item>
                             <el-menu-item index="/hot"><el-icon><StarFilled /></el-icon>热销商品配置</el-menu-item>
                             <el-menu-item index="/new"><el-icon><Sell /></el-icon>新品上线配置</el-menu-item>
                             <el-menu-item index="/recommend"><el-icon><ShoppingCart /></el-icon>为你推荐配置</el-menu-item>
@@ -42,7 +42,7 @@
                         </template>
                         <el-menu-item-group>
                             <el-menu-item index="/category"><el-icon><Menu /></el-icon>分类管理</el-menu-item>
-                            <el-menu-item index="/good"><el-icon><Goods /></el-icon>商品管理</el-menu-item>
+                            <el-menu-item index="/goods"><el-icon><Goods /></el-icon>商品管理</el-menu-item>
                             <el-menu-item index="/guest"><el-icon><User /></el-icon>会员管理</el-menu-item>
                             <el-menu-item index="/order"><el-icon><List /></el-icon>订单管理</el-menu-item>
                         </el-menu-item-group>
@@ -91,21 +91,9 @@ router.afterEach((to, from) => {
 })
 
 router.beforeEach((to, from, next) => {
-    if (to.path === '/login') {
-        // 如果路径是 /login 则正常执行
-        next()
-    } else {
-        // 如果不是 /login，判断是否有 token
-        if (!getLocal('token')) {
-            // 如果没有，则跳至登录页面
-            next({ path: '/login' })
-        } else {
-            // 否则继续执行
-            next()
-        }
-    }
     state.currentPath = to.path
     document.title = pathMap[to.name]
+    next()
 })
 </script>
 
@@ -133,12 +121,11 @@ router.beforeEach((to, from, next) => {
 }
 
 .head img {
-    width: 50px;
     height: 50px;
     margin-right: 10px;
 }
 .head span {
-    font-size: 20px;
+    font-size: 16px;
     color: #ffffff;
 }
 .line {
@@ -163,6 +150,7 @@ body {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
 }
 .el-menu {
     border-right: none!important;
