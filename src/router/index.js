@@ -95,10 +95,10 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     console.log(to)
     if (!getLocal('token') && to.path !== '/login'){
-        console.log('去登录界面')
+        // console.log('去登录界面')
         next({path: '/login'})
     } else {
-        console.log('去下个界面')
+        // console.log('去下个界面')
         next()
     }
 })

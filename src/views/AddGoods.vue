@@ -35,8 +35,8 @@
                             :action="state.uploadImgServer"
                             accept="jpg,jpeg,png"
                             :headers="{
-              token: state.token
-            }"
+                                token: state.token
+                            }"
                             :show-file-list="false"
                             :before-upload="handleBeforeUpload"
                             :on-success="handleUrlSuccess"
@@ -130,6 +130,7 @@ onMounted(async () => {
     instance.config.showLinkImgAlt = false
     instance.config.showLinkImgHref = false
     instance.config.uploadImgMaxSize = 2 * 1024 * 1024 // 2M
+    instance.config.uploadImgMaxLength = 5
     instance.config.uploadFileName = 'file'
     instance.config.uploadImgHeaders = {
         token: state.token
@@ -138,7 +139,7 @@ onMounted(async () => {
     instance.config.uploadImgHooks = {
         // 图片上传并返回了结果，想要自己把图片插入到编辑器中
         // 例如服务器端返回的不是 { errno: 0, data: [...] } 这种格式，可使用 customInsert
-        customInsert: function (insertImgFn, result) {
+        customInsert: (insertImgFn, result) => {
             console.log('result', result)
             // result 即服务端返回的接口
             // insertImgFn 可把图片插入到编辑器，传入图片 src ，执行函数即可
@@ -156,22 +157,23 @@ onMounted(async () => {
     instance.create()
     if (id) {
         const {data} = await getGoodsDetail(id)
-        const { goods, firstCategory, secondCategory, thirdCategory } = data
-        state.goodForm = {
-            goodsName: goods.goodsName,
-            goodsIntro: goods.goodsIntro,
-            originalPrice: goods.originalPrice,
-            sellingPrice: goods.sellingPrice,
-            stockNum: goods.stockNum,
-            goodsSaleStatus: String(goods.goodsSaleStatus),
-            goodsCoverImg: proxy.$filters.prefix(goods.goodsCoverImg),
-            tag: goods.tag
+        // console.log(data)
+        const { goodsInfo, firstCategory, secondCategory, thirdCategory } = data
+        state.goodsForm = {
+            goodsName: goodsInfo.goodsName,
+            goodsIntro: goodsInfo.goodsIntro,
+            originalPrice: goodsInfo.originalPrice,
+            sellingPrice: goodsInfo.sellingPrice,
+            stockNum: goodsInfo.stockNum,
+            goodsSaleStatus: String(goodsInfo.goodsSaleStatus),
+            goodsCoverImg: proxy.$filters.prefix(goodsInfo.goodsCoverImg),
+            tag: goodsInfo.tag
         }
-        state.categoryId = goods.goodsCategoryId
+        state.categoryId = goodsInfo.goodsCategoryId
         state.defaultCate = `${firstCategory.categoryName}/${secondCategory.categoryName}/${thirdCategory.categoryName}`
         if (instance) {
             // 初始化商品详情 html
-            instance.txt.html(goods.goodsDetailContent)
+            instance.txt.html(goodsInfo.goodsDetailContent)
         }
     }
 })

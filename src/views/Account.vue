@@ -1,6 +1,6 @@
 <template>
     <el-card class="account-container">
-        <el-form :model="state.nameForm" :rules="state.rules" ref="nameRef" label-width="80px" label-position="right" class="demo-ruleForm">
+        <el-form :model="state.nameForm" :rules="state.rules" ref="nameRef" label-width="100px" label-position="right" class="demo-ruleForm">
             <el-form-item label="账号：" prop="loginName">
                 <el-input style="width: 200px" v-model="state.nameForm.loginName" disabled></el-input>
             </el-form-item>
@@ -13,12 +13,15 @@
         </el-form>
     </el-card>
     <el-card class="account-container">
-        <el-form :model="state.passForm" :rules="state.rules" ref="passRef" label-width="80px" label-position="right" class="demo-ruleForm">
+        <el-form :model="state.passForm" :rules="state.rules" ref="passRef" label-width="100px" label-position="right" class="demo-ruleForm">
             <el-form-item label="原密码：" prop="oldPass">
                 <el-input style="width: 200px" v-model="state.passForm.oldPass"></el-input>
             </el-form-item>
             <el-form-item label="新密码：" prop="newPass">
                 <el-input style="width: 200px" v-model="state.passForm.newPass"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码：" prop="newPass2">
+                <el-input style="width: 200px" v-model="state.passForm.newPass2"></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button type="danger" @click="submitPass">确认修改</el-button>
@@ -35,6 +38,27 @@ import {editName, editPassword, getProfile} from "@/service/adminUser.js";
 
 const nameRef = ref(null)
 const passRef = ref(null)
+const checkPass = (rule, value, callback) => {
+    if (!value){
+        callback(new Error('请输入密码'))
+    }
+    if (value === state.passForm.oldPass){
+        callback(new Error('新密码不能与原密码一致'))
+    } else {
+        callback()
+    }
+}
+
+const checkPass2 = (rule, value, callback) => {
+    if (!value){
+        callback(new Error('请输入密码'))
+    }
+    if (value !== state.passForm.newPass){
+        callback(new Error('新密码输入不一致'))
+    } else {
+        callback()
+    }
+}
 const state = reactive({
     user: null,
     nameForm: {
@@ -43,7 +67,8 @@ const state = reactive({
     },
     passForm: {
         oldPass: '',
-        newPass: ''
+        newPass: '',
+        newPass2: ''
     },
     rules: {
         loginName: [
@@ -56,7 +81,12 @@ const state = reactive({
             { required: 'true', message: '原密码不能为空', trigger: ['change'] }
         ],
         newPass: [
-            { required: 'true', message: '新密码不能为空', trigger: ['change'] }
+            { required: 'true', message: '新密码不能为空', trigger: ['change'] },
+            { validator: checkPass, trigger: ['blur']}
+        ],
+        newPass2: [
+            { required: 'true', message: '新密码不能为空', trigger: ['change'] },
+            { validator: checkPass2, trigger: ['blur']}
         ]
     },
 })
@@ -85,10 +115,6 @@ const submitName = () => {
 const submitPass = () => {
     passRef.value.validate(async (valid) => {
         if (valid){
-            if (state.passForm.oldPass === state.passForm.newPass){
-                ElMessage.error('新旧密码不能相同')
-                return
-            }
             const params = {
                 originalPassword: md5(state.passForm.oldPass),
                 newPassword: md5(state.passForm.newPass)
@@ -99,6 +125,9 @@ const submitPass = () => {
         }
     })
 }
+
+
+
 </script>
 
 <style scoped>

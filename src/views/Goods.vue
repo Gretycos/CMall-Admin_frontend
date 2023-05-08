@@ -48,7 +48,7 @@
                     label="上架状态"
             >
                 <template #default="scope">
-                    <span style="color: green;" v-if="scope.row.goodsSaleStatus == 0">销售中</span>
+                    <span style="color: green;" v-if="scope.row.goodsSaleStatus === 0">销售中</span>
                     <span style="color: red;" v-else>已下架</span>
                 </template>
             </el-table-column>
@@ -59,7 +59,7 @@
             >
                 <template #default="scope">
                     <a style="cursor: pointer; margin-right: 10px" @click="handleEdit(scope.row.goodsId)">修改</a>
-                    <a style="cursor: pointer; margin-right: 10px" v-if="scope.row.goodsSaleStatus == 0" @click="handleStatus(scope.row.goodsId, 1)">下架</a>
+                    <a style="cursor: pointer; margin-right: 10px" v-if="scope.row.goodsSaleStatus === 0" @click="handleStatus(scope.row.goodsId, 1)">下架</a>
                     <a style="cursor: pointer; margin-right: 10px" v-else @click="handleStatus(scope.row.goodsId, 0)">上架</a>
                 </template>
             </el-table-column>

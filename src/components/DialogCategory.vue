@@ -4,7 +4,7 @@
 -->
 <template>
     <el-dialog
-            :title="state.type == 'add' ? '添加分类' : '修改分类'"
+            :title="props.type === 'add' ? '添加分类' : '修改分类'"
             v-model="state.visible"
             width="400px"
     >
@@ -37,6 +37,19 @@ const props = defineProps({
 })
 const formRef = ref(null)
 const route = useRoute()
+
+// 表单校验定义在前面
+const checkRank = (rule, value, callback) => {
+    const rank = parseInt(value)
+    if (rank > 200){
+        callback(new Error('排序值最大是200'))
+    } else if (rank < 1){
+        callback(new Error('排序值最小是1'))
+    } else {
+        callback()
+    }
+}
+
 const state = reactive({
     visible: false,
     categoryLevel: 1,
@@ -50,7 +63,8 @@ const state = reactive({
             { required: 'true', message: '名称不能为空', trigger: ['change'] }
         ],
         rank: [
-            { required: 'true', message: '编号不能为空', trigger: ['change'] }
+            { required: 'true', message: '排序值不能为空', trigger: ['change'] },
+            { validator: checkRank, trigger: ['blur']}
         ]
     },
     id: ''
@@ -61,6 +75,7 @@ const getDetail = async (id) => {
         name: data.categoryName,
         rank: data.categoryRank
     }
+    // console.log(state.ruleForm)
     state.parentId = data.parentId
     state.categoryLevel = data.categoryLevel
 }

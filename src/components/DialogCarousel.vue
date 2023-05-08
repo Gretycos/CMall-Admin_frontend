@@ -11,8 +11,8 @@
                         :action="state.uploadImgServer"
                         accept="jpg,jpeg,png"
                         :headers="{
-            token: state.token
-          }"
+                          token: state.token
+                        }"
                         :show-file-list="false"
                         :before-upload="handleBeforeUpload"
                         :on-success="handleUrlSuccess"
@@ -61,6 +61,9 @@ const state = reactive({
     rules: {
         url: [
             { required: 'true', message: '图片不能为空', trigger: ['change'] }
+        ],
+        link: [
+            { required: 'true', message: '跳转链接不能为空', trigger: ['change'] }
         ],
         sort: [
             { required: 'true', message: '排序不能为空', trigger: ['change'] }
