@@ -21,5 +21,5 @@ export function editHomepage(params) {
 }
 
 export function deleteHomepage(params) {
-    return axios.delete('/homepage', {params})
+    return axios.post('/homepage/delete', params)
 }

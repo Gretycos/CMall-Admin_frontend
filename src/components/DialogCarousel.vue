@@ -1,6 +1,6 @@
 <template>
     <el-dialog
-            :title="type == 'add' ? '添加轮播图' : '修改轮播图'"
+            :title="type === 'add' ? '添加轮播图' : '修改轮播图'"
             v-model="state.visible"
             width="400px"
     >

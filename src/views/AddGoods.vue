@@ -46,7 +46,19 @@
                     </el-upload>
                 </el-form-item>
                 <el-form-item label="详情内容">
-                    <div ref='editor'></div>
+                    <Toolbar
+                        class="toolbar"
+                        :editor="editorRef"
+                        :defaultConfig="toolbarConfig"
+                        :mode="mode"
+                    />
+                    <Editor
+                        class="editor"
+                        v-model="valueHtml"
+                        :defaultConfig="editorConfig"
+                        :mode="mode"
+                        @onCreated="handleCreated"
+                    />
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="submitAdd()">{{ state.id ? '立即修改' : '立即创建' }}</el-button>
@@ -57,21 +69,34 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue'
+import '@wangeditor/editor/dist/css/style.css'
+import { reactive, ref, shallowRef, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import {getLocal, uploadImgServer, uploadImgsServer} from "@/common/js/utils.js";
 import {getCategoryList} from "@/service/category.js";
-import WangEditor from "wangeditor";
+// import WangEditor from "wangeditor";
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import {addGoods, editGoods, getGoodsDetail} from "@/service/goods.js";
+import {deleteFiles} from "@/service/upload.js";
 
 const { proxy } = getCurrentInstance()
-let instance
-const editor = ref(null)
+// let instance
+const editorRef = shallowRef(null)
+const valueHtml = ref('')
+const mode = 'default'
 const goodsRef = ref(null)
 const route = useRoute()
 const router = useRouter()
 const { id } = route.query
+// 图片相关
+let coverOrigin = []
+let coverHistory = []
+let coverCurrent = []
+let imagesOrigin = []
+let imagesHistory = []
+let imagesCurrent = []
+// 响应式变量
 const state = reactive({
     uploadImgServer,
     token: getLocal('token') || '',
@@ -124,37 +149,32 @@ const state = reactive({
     }
 })
 
-onMounted(async () => {
-    instance = new WangEditor(editor.value)
-    instance.config.showLinkImg = false
-    instance.config.showLinkImgAlt = false
-    instance.config.showLinkImgHref = false
-    instance.config.uploadImgMaxSize = 2 * 1024 * 1024 // 2M
-    instance.config.uploadImgMaxLength = 5
-    instance.config.uploadFileName = 'file'
-    instance.config.uploadImgHeaders = {
-        token: state.token
-    }
-    // 图片返回格式不同，需要自定义返回格式
-    instance.config.uploadImgHooks = {
-        // 图片上传并返回了结果，想要自己把图片插入到编辑器中
-        // 例如服务器端返回的不是 { errno: 0, data: [...] } 这种格式，可使用 customInsert
-        customInsert: (insertImgFn, result) => {
-            console.log('result', result)
-            // result 即服务端返回的接口
-            // insertImgFn 可把图片插入到编辑器，传入图片 src ，执行函数即可
-            if (result.data && result.data.length) {
-                result.data.forEach(item => insertImgFn(item))
+const editorConfig =  {
+    MENU_CONF: {
+        'uploadImage': {
+            server: uploadImgsServer,
+            headers: {
+                token: state.token
+            },
+            fieldName: 'file',
+            maxNumberOfFiles: 5,
+            maxFileSize: 2 * 1024 * 1024, // 2M
+            customInsert(res, insertFn){
+                if (res.data && res.data.length) {
+                    console.log('插入图片', res.data)
+                    res.data.forEach(item => {
+                        imagesHistory.push(item)
+                        insertFn(item)
+                    })
+                }
             }
         }
     }
-    instance.config.uploadImgServer = uploadImgsServer
-    Object.assign(instance.config, {
-        onchange() {
-            console.log('change')
-        },
-    })
-    instance.create()
+}
+const toolbarConfig = {}
+
+onMounted(async () => {
+    window.addEventListener('beforeunload', event => beforeunloadHandler(event))
     if (id) {
         const {data} = await getGoodsDetail(id)
         // console.log(data)
@@ -171,17 +191,38 @@ onMounted(async () => {
         }
         state.categoryId = goodsInfo.goodsCategoryId
         state.defaultCate = `${firstCategory.categoryName}/${secondCategory.categoryName}/${thirdCategory.categoryName}`
-        if (instance) {
+        if (editorRef.value) {
             // 初始化商品详情 html
-            instance.txt.html(goodsInfo.goodsDetailContent)
+            editorRef.value.setHtml(goodsInfo.goodsDetailContent)
+            imagesOrigin = editorRef.value.getElemsByType('image').map(item => item.src)
+            imagesHistory = editorRef.value.getElemsByType('image').map(item => item.src)
         }
+        coverOrigin = [proxy.$filters.prefix(goodsInfo.goodsCoverImg)]
+        coverHistory = [proxy.$filters.prefix(goodsInfo.goodsCoverImg)]
     }
 })
 
-onBeforeUnmount(() => {
-    instance.destroy()
-    instance = null
+onBeforeUnmount(async () => {
+    const editor = editorRef.value
+    if (editor == null) return
+    editor.destroy()
+    await deleteCoversUnsaved()
+    await deleteImgsUnsaved()
+    window.removeEventListener('beforeunload', beforeunloadHandler)
 })
+
+const beforeunloadHandler = async (event) => {
+    event.preventDefault()
+}
+
+const onUnloadHandler = async () => {
+    await deleteCoversUnsaved()
+    await deleteImgsUnsaved()
+}
+
+const handleCreated = (editor) => {
+    editorRef.value = editor
+}
 
 const submitAdd = () => {
     goodsRef.value.validate(async (valid) => {
@@ -189,7 +230,7 @@ const submitAdd = () => {
             let params = {
                 goodsCategoryId: state.categoryId,
                 goodsCoverImg: state.goodsForm.goodsCoverImg,
-                goodsDetailContent: instance.txt.html(),
+                goodsDetailContent: valueHtml.value,
                 goodsIntro: state.goodsForm.goodsIntro,
                 goodsName: state.goodsForm.goodsName,
                 goodsSaleStatus: state.goodsForm.goodsSaleStatus,
@@ -206,6 +247,9 @@ const submitAdd = () => {
                 await addGoods(params)
                 ElMessage.success('添加成功')
             }
+            // 提交之后需要检查之前上传的图片是否还存在当前的内容中，如果不存在则需要删除
+            await deleteImgsDiff()
+            await deleteCoversDiff()
             await router.push({path: '/goods'})
         }
     })
@@ -219,13 +263,63 @@ const handleBeforeUpload = (file) => {
     }
 }
 
-const handleUrlSuccess = (val) => {
+const handleUrlSuccess = async (val) => {
     state.goodsForm.goodsCoverImg = val.data || ''
+    coverHistory.push(val.data)
 }
 
 const handleChangeCate = (val) => {
     state.categoryId = val[2] || 0
 }
+
+// 因为上传图片是立即上传的
+// 所以提交之后需要处理不存在的图片
+const deleteImgsDiff = async () => {
+    imagesCurrent = editorRef.value.getElemsByType('image').map(item => item.src)
+    const imagesDiff = imagesHistory.concat(imagesCurrent).filter(v => imagesHistory.includes(v) && !imagesCurrent.includes(v))
+    // console.log('imagesDiff', imagesDiff)
+    if (imagesDiff.length > 0){
+        const params = {
+            urls: imagesDiff
+        }
+        await deleteFiles(params)
+        imagesOrigin = imagesHistory = imagesCurrent
+    }
+}
+
+const deleteImgsUnsaved = async () => {
+    const imagesUnsaved = imagesHistory.filter(v => !imagesOrigin.includes(v))
+    if (imagesUnsaved.length > 0){
+        const params = {
+            urls: imagesUnsaved
+        }
+        await deleteFiles(params)
+    }
+}
+
+const deleteCoversDiff = async () => {
+    coverCurrent = [state.goodsForm.goodsCoverImg]
+    const coverDiff = coverHistory.concat(coverCurrent).filter(v => coverHistory.includes(v) && !coverCurrent.includes(v))
+    if (coverDiff.length > 0){
+        const params = {
+            urls: coverDiff
+        }
+        await deleteFiles(params)
+        coverOrigin = coverHistory = coverCurrent
+    }
+}
+
+const deleteCoversUnsaved = async () => {
+    const coversUnsaved = coverHistory.filter(v => !coverOrigin.includes(v))
+    if (coversUnsaved.length > 0){
+        const params = {
+            urls: coversUnsaved
+        }
+        await deleteFiles(params)
+    }
+}
+
+
 </script>
 
 <style scoped>
@@ -248,5 +342,12 @@ const handleChangeCate = (val) => {
     height: 100%;
     border: 1px solid #e9e9e9;
     padding: 32px 17px;
+}
+.toolbar{
+    border-bottom: 1px solid #ccc
+}
+.editor{
+    width: 100%;
+    height: 1000px!important;
 }
 </style>

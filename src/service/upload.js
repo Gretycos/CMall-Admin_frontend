@@ -4,10 +4,6 @@
  */
 import axios from "@/common/js/axios.js";
 
-export function uploadFile(params) {
-    return axios.post('/upload/file', params)
-}
-
-export function uploadFiles() {
-    return axios.post('/upload/files')
+export function deleteFiles(params) {
+    return axios.post('/delete/files', params)
 }

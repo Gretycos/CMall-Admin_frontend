@@ -1,5 +1,5 @@
 <template>
-    <el-card class="good-container">
+    <el-card class="goods-container">
         <template #header>
             <div class="header">
                 <el-button type="primary" :icon="Plus" @click="handleAdd">新增商品</el-button>
@@ -138,7 +138,7 @@ const handleStatus = async (id, status) => {
 </script>
 
 <style scoped>
-.good-container {
+.goods-container {
     min-height: 100%;
 }
 .el-card.is-always-shadow {

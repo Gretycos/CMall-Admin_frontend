@@ -21,5 +21,5 @@ export function editCarousel(params) {
 }
 
 export function deleteCarousel(params) {
-    return axios.delete('/carousels', {params})
+    return axios.post('/carousels/delete', params)
 }
