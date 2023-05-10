@@ -22,7 +22,7 @@
                         </template>
                         <el-menu-item-group>
                             <el-menu-item index="/"><el-icon><Odometer /></el-icon>首页</el-menu-item>
-                            <el-menu-item index="/add"><el-icon><Plus /></el-icon>添加商品</el-menu-item>
+<!--                            <el-menu-item index="/add"><el-icon><Plus /></el-icon>添加商品</el-menu-item>-->
                         </el-menu-item-group>
                     </el-sub-menu>
                     <el-sub-menu index="2">
@@ -34,6 +34,7 @@
                             <el-menu-item index="/hot"><el-icon><StarFilled /></el-icon>热销商品配置</el-menu-item>
                             <el-menu-item index="/new"><el-icon><Sell /></el-icon>新品上线配置</el-menu-item>
                             <el-menu-item index="/recommend"><el-icon><ShoppingCart /></el-icon>为你推荐配置</el-menu-item>
+                            <el-menu-item index="/seckill"><el-icon><AlarmClock /></el-icon>秒杀配置</el-menu-item>
                         </el-menu-item-group>
                     </el-sub-menu>
                     <el-sub-menu index="3">
@@ -77,6 +78,7 @@ import { useRouter } from 'vue-router'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import { getLocal, pathMap } from '@/common/js/utils'
+import {AlarmClock} from "@element-plus/icons-vue";
 
 const noMenu = ['/login']
 const router = useRouter()

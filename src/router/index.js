@@ -48,6 +48,11 @@ const router = createRouter({
             component: () => import(/* webpackChunkName: "recommend" */ '../views/HomepageConfig.vue')
         },
         {
+            path: '/seckill',
+            name: 'seckill',
+            component: () => import(/* webpackChunkName: "recommend" */ '../views/Seckill.vue')
+        },
+        {
             path: '/category',
             name: 'category',
             component: () => import(/* webpackChunkName: "category" */ '../views/Category.vue'),

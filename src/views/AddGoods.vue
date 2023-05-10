@@ -75,13 +75,11 @@ import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import {getLocal, uploadImgServer, uploadImgsServer} from "@/common/js/utils.js";
 import {getCategoryList} from "@/service/category.js";
-// import WangEditor from "wangeditor";
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import {addGoods, editGoods, getGoodsDetail} from "@/service/goods.js";
 import {deleteFiles} from "@/service/upload.js";
 
 const { proxy } = getCurrentInstance()
-// let instance
 const editorRef = shallowRef(null)
 const valueHtml = ref('')
 const mode = 'default'
@@ -174,7 +172,9 @@ const editorConfig =  {
 const toolbarConfig = {}
 
 onMounted(async () => {
-    window.addEventListener('beforeunload', event => beforeunloadHandler(event))
+    window.onbeforeunload = async () => {
+        await beforeunloadHandler()
+    }
     if (id) {
         const {data} = await getGoodsDetail(id)
         // console.log(data)
@@ -208,14 +208,9 @@ onBeforeUnmount(async () => {
     editor.destroy()
     await deleteCoversUnsaved()
     await deleteImgsUnsaved()
-    window.removeEventListener('beforeunload', beforeunloadHandler)
 })
 
-const beforeunloadHandler = async (event) => {
-    event.preventDefault()
-}
-
-const onUnloadHandler = async () => {
+const beforeunloadHandler = async () => {
     await deleteCoversUnsaved()
     await deleteImgsUnsaved()
 }
