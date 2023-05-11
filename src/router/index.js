@@ -28,6 +28,11 @@ const router = createRouter({
             component: () => import(/* webpackChunkName: "add" */ '../views/AddGoods.vue')
         },
         {
+            path: '/addSeckill',
+            name: 'addSeckill',
+            component: () => import(/* webpackChunkName: "add" */ '../views/AddSeckill.vue')
+        },
+        {
             path: '/carousel',
             name: 'carousel',
             component: () => import(/* webpackChunkName: "swiper" */ '../views/Carousel.vue')

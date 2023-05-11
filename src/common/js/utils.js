@@ -23,6 +23,7 @@ export const pathMap = {
     introduce: '系统介绍',
     dashboard: '大盘数据',
     add: '添加商品',
+    addSeckill: '添加秒杀',
     carousel: '轮播图配置',
     hot: '热销商品配置',
     new: '新品上线配置',

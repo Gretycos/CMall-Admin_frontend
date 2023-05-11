@@ -8,25 +8,36 @@
             :data="state.tableData"
             tooltip-effect="dark"
             style="width: 100%"
+            :stripe="true"
+            :border="true"
+            table-layout="auto"
         >
             <el-table-column
                 prop="seckillId"
                 label="秒杀编号"
+                width="100%"
+                header-align="center"
+                align="right"
             >
             </el-table-column>
             <el-table-column
                 prop="goodsId"
                 label="商品编号"
+                width="100%"
+                header-align="center"
+                align="right"
             >
             </el-table-column>
             <el-table-column
                 prop="goodsName"
                 label="商品名称"
+                width="100%"
+                align="center"
             >
             </el-table-column>
             <el-table-column
                 label="商品图片"
-                width="150px"
+                align="center"
             >
                 <template #default="scope">
                     <img style="width: 100px; height: 100px;" :key="scope.row.seckillId" :src="$filters.prefix(scope.row.goodsCoverImg)" alt="商品主图">
@@ -35,15 +46,23 @@
             <el-table-column
                 prop="seckillPrice"
                 label="秒杀价格"
+                width="100%"
+                header-align="center"
+                align="right"
             >
             </el-table-column>
             <el-table-column
                 prop="seckillNum"
                 label="秒杀数量"
+                width="100%"
+                header-align="center"
+                align="right"
             >
             </el-table-column>
             <el-table-column
                 label="秒杀状态"
+                width="100%"
+                align="center"
             >
                 <template #default="scope">
                     <span style="color: green;" v-if="scope.row.seckillStatus">秒杀中</span>
@@ -53,21 +72,27 @@
             <el-table-column
                 prop="seckillBegin"
                 label="秒杀开始时间"
+                width="180px"
+                align="center"
             >
             </el-table-column>
             <el-table-column
                 prop="seckillEnd"
                 label="秒杀结束时间"
+                width="180px"
+                align="center"
             >
             </el-table-column>
             <el-table-column
                 prop="seckillRank"
                 label="排序值"
+                width="100%"
             >
             </el-table-column>
             <el-table-column
                 label="操作"
-                width="100"
+                width="100px"
+                align="center"
             >
                 <template #default="scope">
                     <a style="cursor: pointer; margin-right: 10px" @click="handleEdit(scope.row.seckillId)">修改</a>
@@ -76,11 +101,15 @@
             <el-table-column
                 prop="createTime"
                 label="秒杀创建时间"
+                align="center"
+                width="180px"
             >
             </el-table-column>
             <el-table-column
                 prop="updateTime"
                 label="秒杀更新时间"
+                width="180px"
+                align="center"
             >
             </el-table-column>
         </el-table>
@@ -123,7 +152,8 @@ const getSeckill = async () => {
         pageNumber: state.currentPage,
         pageSize: state.pageSize
     }
-    const {data} = getSeckillList(params)
+    const {data} = await getSeckillList(params)
+    console.log(data)
     state.tableData = data.list
     state.total = data.totalCount
     state.currentPage = data.currPage
