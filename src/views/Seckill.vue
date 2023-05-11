@@ -1,8 +1,10 @@
 <template>
     <el-card class="seckill-container">
-        <div class="header">
-            <el-button type="primary" :icon="Plus" @click="handleAdd">新建秒杀</el-button>
-        </div>
+        <template #header>
+            <div class="header">
+                <el-button type="primary" :icon="Plus" @click="handleAdd">新建秒杀</el-button>
+            </div>
+        </template>
         <el-table
             v-loading="state.loading"
             :data="state.tableData"
@@ -91,11 +93,12 @@
             </el-table-column>
             <el-table-column
                 label="操作"
-                width="100px"
+                width="120px"
                 align="center"
             >
                 <template #default="scope">
                     <a style="cursor: pointer; margin-right: 10px" @click="handleEdit(scope.row.seckillId)">修改</a>
+                    <a style="cursor: pointer; margin-right: 10px" @click="handleDelete(scope.row.seckillId, scope.row.seckillStatus)">删除</a>
                 </template>
             </el-table-column>
             <el-table-column
@@ -129,7 +132,8 @@
 import {Plus} from "@element-plus/icons-vue";
 import {onMounted, getCurrentInstance, reactive} from "vue";
 import {useRouter} from "vue-router";
-import {getSeckillList} from "@/service/seckill.js";
+import {deleteSeckill, getSeckillList} from "@/service/seckill.js";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 const app = getCurrentInstance()
 const { goTop } = app.appContext.config.globalProperties
@@ -169,6 +173,28 @@ const handleEdit = (id) => {
     router.push({ path: '/addSeckill', query: { id } })
 }
 
+const handleDelete = (id, status) => {
+    ElMessageBox.confirm(
+        '确认删除秒杀事件吗？',
+        'Warning',
+        {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }
+    ).then( async () => {
+        if (status) {
+            ElMessage.error('请先下架当前秒杀事件')
+        } else {
+            await deleteSeckill(id)
+            ElMessage.success('删除成功')
+            await getSeckill()
+        }
+    }).catch( () => {
+        ElMessage.info('取消删除操作')
+    })
+}
+
 const changePage = (val) => {
     state.currentPage = val
     getSeckill()
@@ -177,7 +203,7 @@ const changePage = (val) => {
 </script>
 
 <style scoped>
-.goods-container {
+.seckill-container {
     min-height: 100%;
 }
 .el-card.is-always-shadow {
