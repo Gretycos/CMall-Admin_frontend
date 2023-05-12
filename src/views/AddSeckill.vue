@@ -3,7 +3,7 @@
         <el-card class="add-container">
             <el-form :model="state.seckillForm" :rules="state.rules" ref="seckillRef" label-width="100px" class="seckillForm">
                 <el-form-item label="商品编码" prop="goodsId">
-                    <el-input style="width: 300px" v-model="state.seckillForm.goodsId" :disabled="!!id" @blur="handleGoodsIdBlur"></el-input>
+                    <el-input style="width: 300px" v-model="state.seckillForm.goodsId" :disabled="!!id"></el-input>
                 </el-form-item>
                 <el-form-item label="商品名称" prop="goodsName">
                     <el-input style="width: 300px" v-model="state.seckillForm.goodsName" disabled></el-input>
@@ -91,6 +91,23 @@ const seckillRef = ref(null)
 const route = useRoute()
 const router = useRouter()
 const { id } = route.query
+
+const checkGoodsId = async (rule, value, callback) => {
+    if (id){
+        callback()
+    } else {
+        try{
+            const {data} = await getGoodsDetail(value)
+            state.seckillForm.goodsName = data.goodsInfo.goodsName
+            state.seckillForm.goodsCoverImg = data.goodsInfo.goodsCoverImg
+            callback()
+        }catch (e) {
+            state.seckillForm.goodsName = ''
+            state.seckillForm.goodsCoverImg = ''
+            callback(new Error('请输入合法的商品编码'))
+        }
+    }
+}
 const state = reactive({
     id: id,
     seckillForm: {
@@ -108,7 +125,8 @@ const state = reactive({
     },
     rules: {
         goodsId: [
-            { required: 'true', message: '请填写商品id', trigger: ['change'] }
+            { required: 'true', message: '请填写商品编码', trigger: ['change'] },
+            { validator: checkGoodsId, trigger: ['blur']}
         ],
         seckillPrice: [
             { required: 'true', message: '请填写秒杀价格', trigger: ['change'] }
@@ -167,7 +185,7 @@ const submitAdd = () => {
                 seckillBegin: state.seckillForm.seckillBeginDate + ' ' + state.seckillForm.seckillBeginTime,
                 seckillEnd:  state.seckillForm.seckillEndDate + ' ' + state.seckillForm.seckillEndTime,
             }
-            console.log(params)
+            // console.log(params)
             if (id) {
                 params.seckillId = id
                 await editSeckill(params)
@@ -180,15 +198,6 @@ const submitAdd = () => {
             await router.push({path: '/seckill'})
         }
     })
-}
-
-const handleGoodsIdBlur = async () => {
-    if (state.seckillForm.goodsId){
-        const {data} = await getGoodsDetail(state.seckillForm.goodsId)
-        state.seckillForm.goodsName = data.goodsInfo.goodsName
-        state.seckillForm.goodsCoverImg = data.goodsInfo.goodsCoverImg
-    }
-
 }
 
 // 禁用今天之前的日期

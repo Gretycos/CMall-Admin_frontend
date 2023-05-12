@@ -22,7 +22,6 @@
                         </template>
                         <el-menu-item-group>
                             <el-menu-item index="/"><el-icon><Odometer /></el-icon>首页</el-menu-item>
-<!--                            <el-menu-item index="/add"><el-icon><Plus /></el-icon>添加商品</el-menu-item>-->
                         </el-menu-item-group>
                     </el-sub-menu>
                     <el-sub-menu index="2">
@@ -44,6 +43,7 @@
                         <el-menu-item-group>
                             <el-menu-item index="/category"><el-icon><Menu /></el-icon>分类管理</el-menu-item>
                             <el-menu-item index="/goods"><el-icon><Goods /></el-icon>商品管理</el-menu-item>
+                            <el-menu-item index="/coupon"><el-icon><Goods /></el-icon>优惠券管理</el-menu-item>
                             <el-menu-item index="/guest"><el-icon><User /></el-icon>会员管理</el-menu-item>
                             <el-menu-item index="/order"><el-icon><List /></el-icon>订单管理</el-menu-item>
                         </el-menu-item-group>

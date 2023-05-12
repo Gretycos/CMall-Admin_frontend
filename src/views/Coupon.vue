@@ -1,8 +1,8 @@
 <template>
-    <el-card class="seckill-container">
+    <el-card class="coupon-container">
         <template #header>
             <div class="header">
-                <el-button type="primary" :icon="Plus" @click="handleAdd">新建秒杀</el-button>
+                <el-button type="primary" :icon="Plus" @click="handleAdd">新增优惠券</el-button>
             </div>
         </template>
         <el-table
@@ -15,103 +15,108 @@
             table-layout="auto"
         >
             <el-table-column
-                prop="seckillId"
-                label="秒杀编号"
+                prop="couponId"
+                label="优惠券编号"
                 width="100%"
                 header-align="center"
                 align="right"
             >
             </el-table-column>
             <el-table-column
-                prop="goodsId"
-                label="商品编号"
-                width="100%"
-                header-align="center"
-                align="right"
-            >
-            </el-table-column>
-            <el-table-column
-                prop="goodsName"
-                label="商品名称"
+                prop="couponName"
+                label="优惠券名称"
                 width="100%"
                 align="center"
             >
             </el-table-column>
             <el-table-column
-                label="商品图片"
+                prop="couponDesc"
+                label="优惠券描述"
+                width="100%"
+                align="center"
+            >
+            </el-table-column>
+            <el-table-column
+                prop="couponTotal"
+                label="优惠券数量"
+                width="100%"
+                header-align="center"
+                align="right"
+            >
+                <span>{{scope.row.couponTotal === 0 ? '无限制' : scope.row.couponTotal}}</span>
+            </el-table-column>
+            <el-table-column
+                prop="discount"
+                label="抵扣金额"
+                width="100%"
+                header-align="center"
+                align="right"
+            >
+            </el-table-column>
+            <el-table-column
+                prop="min"
+                label="最低消费"
+                width="100%"
+                header-align="center"
+                align="right"
+            >
+            </el-table-column>
+            <el-table-column
+                prop="couponLimit"
+                label="领取限制"
+                width="100%"
                 align="center"
             >
                 <template #default="scope">
-                    <img style="width: 100px; height: 100px;" :key="scope.row.seckillId" :src="$filters.prefix(scope.row.goodsCoverImg)" alt="商品主图">
+                    <span>{{scope.row.couponLimit === 0 ? '无限制' : '限领取1张'}}</span>
                 </template>
             </el-table-column>
             <el-table-column
-                prop="seckillPrice"
-                label="秒杀价格"
+                prop="couponStartTime"
+                label="开始时间"
                 width="100%"
-                header-align="center"
-                align="right"
+                align="center"
             >
             </el-table-column>
             <el-table-column
-                prop="seckillNum"
-                label="秒杀数量"
+                prop="couponEndTime"
+                label="结束时间"
                 width="100%"
-                header-align="center"
-                align="right"
+                align="center"
             >
             </el-table-column>
             <el-table-column
-                label="秒杀状态"
+                prop="couponType"
+                label="类型"
                 width="100%"
                 align="center"
             >
                 <template #default="scope">
-                    <span style="color: green;" v-if="scope.row.seckillStatus">秒杀中</span>
-                    <span style="color: red;" v-else>已下架</span>
+                    <span>{{scope.row.couponType === 0 ? '通用券' : scope.row.couponStatus === 1 ? '注册赠送' : '兑换券'}}</span>
                 </template>
             </el-table-column>
             <el-table-column
-                prop="seckillBegin"
-                label="秒杀开始时间"
-                width="180px"
-                align="center"
-            >
-            </el-table-column>
-            <el-table-column
-                prop="seckillEnd"
-                label="秒杀结束时间"
-                width="180px"
-                align="center"
-            >
-            </el-table-column>
-            <el-table-column
-                prop="seckillRank"
-                label="排序值"
+                prop="couponStatus"
+                label="状态"
                 width="100%"
-            >
-            </el-table-column>
-            <el-table-column
-                label="操作"
-                width="120px"
                 align="center"
             >
                 <template #default="scope">
-                    <a style="cursor: pointer; margin-right: 10px" @click="handleEdit(scope.row.seckillId)">修改</a>
-                    <a style="cursor: pointer; margin-right: 10px" @click="handleDelete(scope.row.seckillId, scope.row.seckillStatus)">删除</a>
+                    <span>{{scope.row.couponStatus === 0 ? '正常可用' : scope.row.couponStatus === 1 ? '过期' : '下架'}}</span>
+                </template>
+            </el-table-column>
+            <el-table-column type="expand">
+                <template #default="props">
+                    <div>商品限制类型: {{props.row.goodsType === 0 ? '全品类' : props.row.goodsType === 1 ? '类目限制' : '商品限制'}}</div>
+                    <div>商品限制值: {{props.row.goodsValue}}</div>
+                    <div>创建时间: {{props.row.createTime}}</div>
+                    <div>修改时间: {{props.row.editTime}}</div>
                 </template>
             </el-table-column>
             <el-table-column
-                prop="createTime"
-                label="秒杀创建时间"
-                align="center"
-                width="180px"
-            >
-            </el-table-column>
-            <el-table-column
-                prop="updateTime"
-                label="秒杀更新时间"
-                width="180px"
+                prop="couponCode"
+                label="兑换码"
+                width="100%"
                 align="center"
             >
             </el-table-column>
@@ -130,10 +135,9 @@
 
 <script setup>
 import {Plus} from "@element-plus/icons-vue";
-import {onMounted, getCurrentInstance, reactive} from "vue";
+import {getCurrentInstance, onMounted, reactive} from "vue";
 import {useRouter} from "vue-router";
-import {deleteSeckill, getSeckillList} from "@/service/seckill.js";
-import {ElMessage, ElMessageBox} from "element-plus";
+import {getCouponList} from "@/service/coupon.js";
 
 const app = getCurrentInstance()
 const { goTop } = app.appContext.config.globalProperties
@@ -147,17 +151,16 @@ const state = reactive({
 })
 
 onMounted(() => {
-    getSeckill()
+    getCoupons()
 })
 
-const getSeckill = async () => {
+const getCoupons = async () => {
     state.loading = true
     const params = {
         pageNumber: state.currentPage,
         pageSize: state.pageSize
     }
-    const {data} = await getSeckillList(params)
-    // console.log(data)
+    const {data} = await getCouponList(params)
     state.tableData = data.list
     state.total = data.totalCount
     state.currentPage = data.currPage
@@ -165,45 +168,16 @@ const getSeckill = async () => {
     goTop && goTop()
 }
 
-const handleAdd = () => {
-    router.push({ path: '/addSeckill' })
-}
-
-const handleEdit = (id) => {
-    router.push({ path: '/addSeckill', query: { id } })
-}
-
-const handleDelete = (id, status) => {
-    ElMessageBox.confirm(
-        '确认删除秒杀事件吗？',
-        'Warning',
-        {
-            confirmButtonText: '确认',
-            cancelButtonText: '取消',
-            type: 'warning',
-        }
-    ).then( async () => {
-        if (status) {
-            ElMessage.error('请先下架当前秒杀事件')
-        } else {
-            await deleteSeckill(id)
-            ElMessage.success('删除成功')
-            await getSeckill()
-        }
-    }).catch( () => {
-        ElMessage.info('取消删除操作')
-    })
-}
-
 const changePage = (val) => {
     state.currentPage = val
-    getSeckill()
+    getCoupons()
 }
+
 
 </script>
 
 <style scoped>
-.seckill-container {
+.coupon-container {
     min-height: 100%;
 }
 .el-card.is-always-shadow {

@@ -80,6 +80,11 @@ const router = createRouter({
             component: () => import(/* webpackChunkName: "new" */ '../views/Goods.vue')
         },
         {
+            path: '/coupon',
+            name: 'coupon',
+            component: () => import(/* webpackChunkName: "new" */ '../views/Coupon.vue')
+        },
+        {
             path: '/guest',
             name: 'guest',
             component: () => import(/* webpackChunkName: "guest" */ '../views/Guest.vue')
