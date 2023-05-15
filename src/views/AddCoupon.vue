@@ -1,7 +1,7 @@
 <template>
     <div class="add">
         <el-card class="add-container">
-            <el-form :model="state.couponForm" :rules="state.rules" ref="couponRef" label-width="100px" class="couponForm">
+            <el-form :model="state.couponForm" :rules="state.rules" ref="couponRef" label-width="130px" class="couponForm">
                 <el-form-item label="优惠券名称" prop="couponName">
                     <el-input style="width: 300px" v-model="state.couponForm.couponName" placeholder="请输入优惠券名称"></el-input>
                 </el-form-item>
@@ -19,8 +19,8 @@
                 </el-form-item>
                 <el-form-item label="领取限制" prop="couponLimit">
                     <el-radio-group v-model="state.couponForm.couponLimit">
-                        <el-radio label="0">无限制</el-radio>
-                        <el-radio label="1">限领1张</el-radio>
+                        <el-radio :label="0">无限制</el-radio>
+                        <el-radio :label="1">限领1张</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="开始时间" prop="couponStartTime">
@@ -28,6 +28,7 @@
                         v-model="state.couponForm.couponStartTime"
                         type="datetime"
                         :disabled-date="getDisabledStartTime"
+                        value-format="YYYY-MM-DD hh:mm:ss"
                         placeholder="请选择开始时间"
                     />
                 </el-form-item>
@@ -36,28 +37,29 @@
                         v-model="state.couponForm.couponEndTime"
                         type="datetime"
                         :disabled-date="getDisabledEndTime"
+                        value-format="YYYY-MM-DD hh:mm:ss"
                         placeholder="请选择结束时间"
                     />
                 </el-form-item>
                 <el-form-item label="类型" prop="couponType">
                     <el-radio-group v-model="state.couponForm.couponType">
-                        <el-radio label="0">通用券</el-radio>
-                        <el-radio label="1">注册赠送</el-radio>
-                        <el-radio label="2">兑换券</el-radio>
+                        <el-radio :label="0">通用券</el-radio>
+                        <el-radio :label="1">注册赠送</el-radio>
+                        <el-radio :label="2">兑换券</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="状态" prop="couponStatus">
                     <el-radio-group v-model="state.couponForm.couponStatus">
-                        <el-radio label="0">正常可用</el-radio>
-                        <el-radio label="1">过期</el-radio>
-                        <el-radio label="2">下架</el-radio>
+                        <el-radio :label="0">正常可用</el-radio>
+                        <el-radio :label="1">过期</el-radio>
+                        <el-radio :label="2">下架</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="商品限制类型" prop="goodsType">
                     <el-radio-group v-model="state.couponForm.goodsType">
-                        <el-radio label="0">全品类</el-radio>
-                        <el-radio label="1">类目限制</el-radio>
-                        <el-radio label="2">商品限制</el-radio>
+                        <el-radio :label="0">全品类</el-radio>
+                        <el-radio :label="1">类目限制</el-radio>
+                        <el-radio :label="2">商品限制</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="商品限制值" prop="goodsValue" v-if="state.couponForm.goodsType !== 0">
@@ -82,7 +84,10 @@ import {getCategoryDetail} from "@/service/category.js";
 import {getGoodsDetail} from "@/service/goods.js";
 import {addCoupon, editCoupon, getCouponDetail} from "@/service/coupon.js";
 import {ElMessage} from "element-plus";
+import {convertTimeStamp} from "@/common/js/utils.js";
 
+let today = new Date()
+today.setDate(today.getDate() - 1)
 const couponRef = ref(null)
 const route = useRoute()
 const router = useRouter()
@@ -167,7 +172,7 @@ const state = reactive({
             { required: 'true', message: '请选择商品限制类型', trigger: ['change'] },
         ],
         goodsValue: [
-            { validator: checkGoodsValue, message: '请填写商品限制值', trigger: ['change'] },
+            { validator: checkGoodsValue, message: '请填写商品限制值', trigger: ['blur'] },
         ],
     }
 })
@@ -225,7 +230,7 @@ const submitAdd = () => {
 }
 
 const getDisabledStartTime = (date) => {
-    return date.getTime() < new Date().getTime()
+    return date.getTime() < today.getTime()
 }
 
 const getDisabledEndTime = (date) => {

@@ -3,17 +3,29 @@
         <template #header>
             <div class="header">
                 <el-button type="primary" :icon="Plus" @click="handleAdd">新增优惠券</el-button>
+                <el-button type="primary" :icon="Edit" @click="handleEdit(state.id)" v-if="state.id">修改优惠券</el-button>
             </div>
         </template>
         <el-table
             v-loading="state.loading"
             :data="state.tableData"
             tooltip-effect="dark"
+            highlight-current-row
             style="width: 100%"
             :stripe="true"
             :border="true"
             table-layout="auto"
+            @current-change="handleCurrentChange"
         >
+            <el-table-column type="expand">
+                <template #default="props">
+                    <div v-if="props.row.couponCode">兑换码:{{props.row.couponCode}}</div>
+                    <div>商品限制类型: {{props.row.goodsType === 0 ? '全品类' : props.row.goodsType === 1 ? '类目限制' : '商品限制'}}</div>
+                    <div v-if="props.row.goodsValue">商品限制值: {{props.row.goodsValue}}</div>
+                    <div>创建时间: {{props.row.createTime}}</div>
+                    <div v-if="props.row.editTime">修改时间: {{props.row.editTime}}</div>
+                </template>
+            </el-table-column>
             <el-table-column
                 prop="couponId"
                 label="优惠券编号"
@@ -43,7 +55,9 @@
                 header-align="center"
                 align="right"
             >
-                <span>{{scope.row.couponTotal === 0 ? '无限制' : scope.row.couponTotal}}</span>
+                <template #default="scope">
+                    <span>{{scope.row.couponTotal === 0 ? '无限制' : scope.row.couponTotal}}</span>
+                </template>
             </el-table-column>
             <el-table-column
                 prop="discount"
@@ -92,7 +106,7 @@
                 align="center"
             >
                 <template #default="scope">
-                    <span>{{scope.row.couponType === 0 ? '通用券' : scope.row.couponStatus === 1 ? '注册赠送' : '兑换券'}}</span>
+                    <span>{{scope.row.couponType === 0 ? '通用券' : scope.row.couponType === 1 ? '注册赠送' : '兑换券'}}</span>
                 </template>
             </el-table-column>
             <el-table-column
@@ -104,21 +118,6 @@
                 <template #default="scope">
                     <span>{{scope.row.couponStatus === 0 ? '正常可用' : scope.row.couponStatus === 1 ? '过期' : '下架'}}</span>
                 </template>
-            </el-table-column>
-            <el-table-column type="expand">
-                <template #default="props">
-                    <div>商品限制类型: {{props.row.goodsType === 0 ? '全品类' : props.row.goodsType === 1 ? '类目限制' : '商品限制'}}</div>
-                    <div>商品限制值: {{props.row.goodsValue}}</div>
-                    <div>创建时间: {{props.row.createTime}}</div>
-                    <div>修改时间: {{props.row.editTime}}</div>
-                </template>
-            </el-table-column>
-            <el-table-column
-                prop="couponCode"
-                label="兑换码"
-                width="100%"
-                align="center"
-            >
             </el-table-column>
         </el-table>
         <!--总数超过一页，再展示分页器-->
@@ -134,15 +133,18 @@
 </template>
 
 <script setup>
-import {Plus} from "@element-plus/icons-vue";
+import {Edit, Plus} from "@element-plus/icons-vue";
 import {getCurrentInstance, onMounted, reactive} from "vue";
 import {useRouter} from "vue-router";
 import {getCouponList} from "@/service/coupon.js";
+import {convertTimeStamp} from "@/common/js/utils.js";
 
 const app = getCurrentInstance()
 const { goTop } = app.appContext.config.globalProperties
 const router = useRouter()
 const state = reactive({
+    id: null,
+    currentRow: null,
     loading: false,
     tableData: [], // 数据列表
     total: 0, // 总条数
@@ -171,6 +173,18 @@ const getCoupons = async () => {
 const changePage = (val) => {
     state.currentPage = val
     getCoupons()
+}
+
+const handleCurrentChange = (currentRow) => {
+    state.id = currentRow.couponId
+}
+
+const handleAdd = () => {
+    router.push({ path: '/addCoupon' })
+}
+
+const handleEdit = (id) => {
+    router.push({ path: '/addCoupon', query: { id } })
 }
 
 

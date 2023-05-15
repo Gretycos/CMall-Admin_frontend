@@ -28,6 +28,11 @@
             >
             </el-table-column>
             <el-table-column
+                prop="categoryId"
+                label="分类编号"
+            >
+            </el-table-column>
+            <el-table-column
                     prop="categoryName"
                     label="分类名称"
             >

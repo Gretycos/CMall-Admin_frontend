@@ -24,6 +24,7 @@ export const pathMap = {
     dashboard: '大盘数据',
     add: '添加商品',
     addSeckill: '添加秒杀',
+    addCoupon: '新增优惠券',
     carousel: '轮播图配置',
     hot: '热销商品配置',
     new: '新品上线配置',
