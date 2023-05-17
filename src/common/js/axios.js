@@ -28,10 +28,10 @@ axios.interceptors.response.use(res => {
         if (res.data.resultCode === 419) {
             router.push({ path: '/login' })
         }
-        if (res.data.data && window.location.hash === '#/login') {
-            setLocal('token', res.data.data)
-            axios.defaults.headers['token'] = res.data.data
-        }
+        // if (res.data.data && window.location.hash === '#/login') {
+        //     setLocal('token', res.data.data)
+        //     axios.defaults.headers['token'] = res.data.data
+        // }
         return Promise.reject(res.data)
     }
 

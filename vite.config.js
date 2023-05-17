@@ -26,9 +26,13 @@ export default defineConfig({
     server: {
         proxy: {
             '/api': {
-                target: 'http://127.0.0.1:8080', // 凡是遇到 /admin 路径的请求，都映射到 target 属性
+                target: 'http://127.0.0.1:8080', // 凡是遇到 /api 路径的请求，都映射到 target 属性
                 changeOrigin: true,
-                rewrite: path => path.replace(/^\/api/, '/admin') // 重写 admin 为 空，就是去掉它
+                rewrite: path => path.replace(/^\/api/, '/admin') // 重写 /api 为 /admin
+            },
+            '/image': {
+                target: 'http://127.0.0.1:8080', // 凡是遇到 /api 路径的请求，都映射到 target 属性
+                changeOrigin: true
             }
         }
     },

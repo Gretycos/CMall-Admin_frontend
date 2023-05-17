@@ -45,6 +45,23 @@
                         <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
                     </el-upload>
                 </el-form-item>
+                <el-form-item required label="商品轮播图" prop="goodsCarousel">
+                    <el-upload
+                        class="avatar-uploader"
+                        :action="state.uploadImgServer"
+                        accept="jpg,jpeg,png"
+                        :headers="{
+                                token: state.token
+                            }"
+                        :show-file-list="false"
+                        :before-upload="handleBeforeUpload"
+                        :on-success="handleUrlSuccess"
+                    >
+
+                        <img style="width: 100px; height: 100px; border: 1px solid #e9e9e9;" v-for="(item, index) in state.goodsForm.goodsCarousel" :src="item" class="avatar">
+                        <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+                    </el-upload>
+                </el-form-item>
                 <el-form-item label="详情内容">
                     <Toolbar
                         class="toolbar"
@@ -108,6 +125,7 @@ const state = reactive({
         stockNum: '',
         goodsSaleStatus: '0',
         goodsCoverImg: '',
+        goodsCarousel: [],
         tag: ''
     },
     rules: {
@@ -187,6 +205,7 @@ onMounted(async () => {
             stockNum: goodsInfo.stockNum,
             goodsSaleStatus: String(goodsInfo.goodsSaleStatus),
             goodsCoverImg: proxy.$filters.prefix(goodsInfo.goodsCoverImg),
+            goodsCarousel: goodsInfo.goodsCarousel.split(',').map(e => proxy.$filters.prefix(e)),
             tag: goodsInfo.tag
         }
         state.categoryId = goodsInfo.goodsCategoryId

@@ -56,8 +56,8 @@
                     label="支付方式"
             >
                 <template #default='scope'>
-                    <span v-if="scope.row.payType == 1">微信支付</span>
-                    <span v-else-if="scope.row.payType == 2">支付宝支付</span>
+                    <span v-if="scope.row.payType === 1">支付宝支付</span>
+                    <span v-else-if="scope.row.payType === 2">微信支付</span>
                     <span v-else>未知</span>
                 </template>
             </el-table-column>
@@ -71,7 +71,7 @@
             >
                 <template #default="scope">
                     <el-popconfirm
-                            v-if="scope.row.orderStatus == 1"
+                            v-if="scope.row.orderStatus === 1"
                             title="确定配货完成吗？"
                             @confirm="handleConfig(scope.row.orderId)"
                             confirm-button-text="确定"
@@ -82,7 +82,7 @@
                         </template>
                     </el-popconfirm>
                     <el-popconfirm
-                            v-if="scope.row.orderStatus == 2"
+                            v-if="scope.row.orderStatus === 2"
                             title="确定出库吗？"
                             @confirm="handleSend(scope.row.orderId)"
                             confirm-button-text="确定"
@@ -93,7 +93,7 @@
                         </template>
                     </el-popconfirm>
                     <el-popconfirm
-                            v-if="!(scope.row.orderStatus == 4 || scope.row.orderStatus < 0)"
+                            v-if="!(scope.row.orderStatus === 4 || scope.row.orderStatus < 0)"
                             title="确定关闭订单吗？"
                             @confirm="handleClose(scope.row.orderId)"
                             confirm-button-text="确定"
@@ -224,7 +224,7 @@ const handleConfig = async (id) => {
 // 出库方法
 const handleSend = async (id) => {
     let params = {
-        ids: null
+        ids: []
     }
     if (id) {
         params.ids = [id]
