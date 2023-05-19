@@ -25,8 +25,8 @@
                 </el-form-item>
                 <el-form-item label="上架状态" prop="goodsSaleStatus">
                     <el-radio-group v-model="state.goodsForm.goodsSaleStatus">
-                        <el-radio label="0">上架</el-radio>
-                        <el-radio label="1">下架</el-radio>
+                        <el-radio label="0">下架</el-radio>
+                        <el-radio label="1">上架</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item required label="商品主图" prop="goodsCoverImg">
@@ -39,9 +39,9 @@
                             }"
                             :show-file-list="false"
                             :before-upload="handleBeforeUpload"
-                            :on-success="handleUrlSuccess"
+                            :on-success="handleCoverUrlSuccess"
                     >
-                        <img style="width: 100px; height: 100px; border: 1px solid #e9e9e9;" v-if="state.goodsForm.goodsCoverImg" :src="state.goodsForm.goodsCoverImg" class="avatar">
+                        <img style="width: 100px; height: 100px; border: 1px solid #e9e9e9;object-fit: cover;" v-if="state.goodsForm.goodsCoverImg" :src="state.goodsForm.goodsCoverImg" class="avatar">
                         <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
                     </el-upload>
                 </el-form-item>
@@ -55,11 +55,11 @@
                             }"
                         :show-file-list="false"
                         :before-upload="handleBeforeUpload"
-                        :on-success="handleUrlSuccess"
+                        :on-success="handleCarouselUrlSuccess"
                     >
 
-                        <img style="width: 100px; height: 100px; border: 1px solid #e9e9e9;" v-for="(item, index) in state.goodsForm.goodsCarousel" :src="item" class="avatar">
-                        <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+                        <img style="width: 100px; height: 100px; border: 1px solid #e9e9e9;object-fit: cover;" v-for="(item, index) in state.goodsForm.goodsCarousel" :src="item" class="avatar">
+                        <el-icon class="avatar-uploader-icon" v-if="state.goodsForm.goodsCarousel.length < 5"><Plus /></el-icon>
                     </el-upload>
                 </el-form-item>
                 <el-form-item label="详情内容">
@@ -111,6 +111,9 @@ let coverCurrent = []
 let imagesOrigin = []
 let imagesHistory = []
 let imagesCurrent = []
+let carouselOrigin = []
+let carouselHistory = []
+let carouselCurrent = []
 // 响应式变量
 const state = reactive({
     uploadImgServer,
@@ -204,8 +207,8 @@ onMounted(async () => {
             sellingPrice: goodsInfo.sellingPrice,
             stockNum: goodsInfo.stockNum,
             goodsSaleStatus: String(goodsInfo.goodsSaleStatus),
-            goodsCoverImg: proxy.$filters.prefix(goodsInfo.goodsCoverImg),
-            goodsCarousel: goodsInfo.goodsCarousel.split(',').map(e => proxy.$filters.prefix(e)),
+            goodsCoverImg: goodsInfo.goodsCoverImg,
+            goodsCarousel: goodsInfo.goodsCarousel.length > 0 ? goodsInfo.goodsCarousel.split(',') : [],
             tag: goodsInfo.tag
         }
         state.categoryId = goodsInfo.goodsCategoryId
@@ -216,8 +219,10 @@ onMounted(async () => {
             imagesOrigin = editorRef.value.getElemsByType('image').map(item => item.src)
             imagesHistory = editorRef.value.getElemsByType('image').map(item => item.src)
         }
-        coverOrigin = [proxy.$filters.prefix(goodsInfo.goodsCoverImg)]
-        coverHistory = [proxy.$filters.prefix(goodsInfo.goodsCoverImg)]
+        coverOrigin = [goodsInfo.goodsCoverImg]
+        coverHistory = [goodsInfo.goodsCoverImg]
+        carouselOrigin = goodsInfo.goodsCarousel.length > 0 ? goodsInfo.goodsCarousel.split(',') : []
+        carouselHistory = goodsInfo.goodsCarousel.length > 0 ? goodsInfo.goodsCarousel.split(',') : []
     }
 })
 
@@ -227,11 +232,13 @@ onBeforeUnmount(async () => {
     editor.destroy()
     await deleteCoversUnsaved()
     await deleteImgsUnsaved()
+    await deleteCarouselUnsaved()
 })
 
 const beforeunloadHandler = async () => {
     await deleteCoversUnsaved()
     await deleteImgsUnsaved()
+    await deleteCarouselUnsaved()
 }
 
 const handleCreated = (editor) => {
@@ -244,6 +251,7 @@ const submitAdd = () => {
             let params = {
                 goodsCategoryId: state.categoryId,
                 goodsCoverImg: state.goodsForm.goodsCoverImg,
+                goodsCarousel: state.goodsForm.goodsCarousel.join(','),
                 goodsDetailContent: valueHtml.value,
                 goodsIntro: state.goodsForm.goodsIntro,
                 goodsName: state.goodsForm.goodsName,
@@ -264,6 +272,7 @@ const submitAdd = () => {
             // 提交之后需要检查之前上传的图片是否还存在当前的内容中，如果不存在则需要删除
             await deleteImgsDiff()
             await deleteCoversDiff()
+            await deleteCarouselDiff()
             await router.push({path: '/goods'})
         }
     })
@@ -277,9 +286,16 @@ const handleBeforeUpload = (file) => {
     }
 }
 
-const handleUrlSuccess = async (val) => {
+const handleCoverUrlSuccess = async (val) => {
     state.goodsForm.goodsCoverImg = val.data || ''
     coverHistory.push(val.data)
+}
+
+const handleCarouselUrlSuccess = async (val) => {
+    if (val){
+        state.goodsForm.goodsCarousel.push(val.data)
+        carouselHistory.push(val.data)
+    }
 }
 
 const handleChangeCate = (val) => {
@@ -297,8 +313,8 @@ const deleteImgsDiff = async () => {
             urls: imagesDiff
         }
         await deleteFiles(params)
-        imagesOrigin = imagesHistory = imagesCurrent
     }
+    imagesOrigin = imagesHistory = imagesCurrent
 }
 
 const deleteImgsUnsaved = async () => {
@@ -319,8 +335,8 @@ const deleteCoversDiff = async () => {
             urls: coverDiff
         }
         await deleteFiles(params)
-        coverOrigin = coverHistory = coverCurrent
     }
+    coverOrigin = coverHistory = coverCurrent
 }
 
 const deleteCoversUnsaved = async () => {
@@ -328,6 +344,30 @@ const deleteCoversUnsaved = async () => {
     if (coversUnsaved.length > 0){
         const params = {
             urls: coversUnsaved
+        }
+        await deleteFiles(params)
+    }
+}
+
+const deleteCarouselDiff = async () => {
+    carouselCurrent = [].concat(state.goodsForm.goodsCarousel)
+    const carouselDiff = carouselHistory.concat(carouselCurrent).filter(v => carouselHistory.includes(v) && !carouselCurrent.includes(v))
+    // console.log(carouselDiff)
+    if (carouselDiff.length > 0){
+        const params = {
+            urls: carouselDiff
+        }
+        await deleteFiles(params)
+    }
+    carouselOrigin = carouselHistory = carouselCurrent
+}
+
+const deleteCarouselUnsaved = async () => {
+    const carouselUnsaved = carouselHistory.filter(v => !carouselOrigin.includes(v))
+    // console.log(carouselUnsaved)
+    if (carouselUnsaved.length > 0){
+        const params = {
+            urls: carouselUnsaved
         }
         await deleteFiles(params)
     }

@@ -17,7 +17,7 @@
                         :before-upload="handleBeforeUpload"
                         :on-success="handleUrlSuccess"
                 >
-                    <img style="width: 200px; height: 100px; border: 1px solid #e9e9e9;" v-if="state.ruleForm.url" :src="state.ruleForm.url" class="avatar">
+                    <img style="width: 200px; height: 100px; border: 1px solid #e9e9e9; object-fit: contain;" v-if="state.ruleForm.url" :src="state.ruleForm.url" class="avatar">
                     <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
                 </el-upload>
             </el-form-item>
@@ -42,12 +42,15 @@ import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import {getLocal, uploadImgServer} from "@/common/js/utils.js";
 import {addCarousel, editCarousel, getCarouselDetail} from "@/service/carousel.js";
+import {deleteFiles} from "@/service/upload.js";
 
 const props = defineProps({
     type: String,
     reload: Function
 })
-
+let urlOrigin = []
+let urlHistory = []
+let urlCurrent = []
 const formRef = ref(null)
 const state = reactive({
     uploadImgServer,
@@ -79,6 +82,8 @@ const getDetail = async (id) => {
         link: data.redirectUrl,
         sort: data.carouselRank
     }
+    urlOrigin = [data.carouselUrl]
+    urlHistory = [data.carouselUrl]
 }
 
 const handleBeforeUpload = (file) => {
@@ -92,6 +97,7 @@ const handleBeforeUpload = (file) => {
 // 上传图片
 const handleUrlSuccess = (val) => {
     state.ruleForm.url = val.data || ''
+    urlHistory.push(val.data)
 }
 
 // 开启弹窗
@@ -106,42 +112,64 @@ const open = (id) => {
             link: '',
             sort: ''
         }
+        urlOrigin = []
+        urlHistory = []
     }
 }
 
 // 关闭弹窗
-const close = () => {
+const close = async () => {
     state.visible = false
+    await deleteUrlUnsaved()
 }
 
 const submitForm = () => {
     formRef.value.validate(async (valid) => {
         if (valid) {
+            let params = {
+                carouselUrl: state.ruleForm.url,
+                redirectUrl: state.ruleForm.link,
+                carouselRank: state.ruleForm.sort
+            }
             if (props.type === 'add') {
-                const params = {
-                    carouselUrl: state.ruleForm.url,
-                    redirectUrl: state.ruleForm.link,
-                    carouselRank: state.ruleForm.sort
-                }
                 await addCarousel(params)
                 ElMessage.success('添加成功')
-                state.visible = false
-                if (props.reload) props.reload()
             } else {
-                const params = {
-                    carouselId: state.id,
-                    carouselUrl: state.ruleForm.url,
-                    redirectUrl: state.ruleForm.link,
-                    carouselRank: state.ruleForm.sort
-                }
+                params.carouselId = state.id
                 await editCarousel(params)
                 ElMessage.success('修改成功')
-                state.visible = false
-                if (props.reload) props.reload()
             }
+            await deleteUrlDiff()
+            state.visible = false
+            if (props.reload) props.reload()
         }
     })
 }
+
+const deleteUrlUnsaved = async () => {
+    const urlUnsaved = urlHistory.filter(v => !urlOrigin.includes(v))
+    console.log(urlUnsaved)
+    if (urlUnsaved.length > 0){
+        const params = {
+            urls: urlUnsaved
+        }
+        await deleteFiles(params)
+    }
+}
+
+const deleteUrlDiff = async () => {
+    urlCurrent = [state.ruleForm.url]
+    const urlDiff = urlHistory.concat(urlCurrent).filter(v => urlHistory.includes(v) && !urlCurrent.includes(v))
+    // console.log(carouselDiff)
+    if (urlDiff.length > 0){
+        const params = {
+            urls: urlDiff
+        }
+        await deleteFiles(params)
+    }
+    urlOrigin = urlHistory = urlCurrent
+}
+
 defineExpose({ open, close })
 </script>
 

@@ -31,7 +31,7 @@
                     width="150px"
             >
                 <template #default="scope">
-                    <img style="width: 100px; height: 100px;" :key="scope.row.goodsId" :src="$filters.prefix(scope.row.goodsCoverImg)" alt="商品主图">
+                    <img style="width: 100px; height: 100px;object-fit: cover;" :key="scope.row.goodsId" :src="scope.row.goodsCoverImg" alt="商品主图">
                 </template>
             </el-table-column>
             <el-table-column

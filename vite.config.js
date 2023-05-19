@@ -32,7 +32,8 @@ export default defineConfig({
             },
             '/image': {
                 target: 'http://127.0.0.1:8080', // 凡是遇到 /api 路径的请求，都映射到 target 属性
-                changeOrigin: true
+                changeOrigin: true,
+                rewrite: path => path.replace(/^\/image/, '/upload')
             }
         }
     },

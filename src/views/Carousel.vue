@@ -31,7 +31,7 @@
                     label="轮播图"
                     width="200">
                 <template #default="scope">
-                    <img style="width: 150px;height: 150px" :src="scope.row.carouselUrl" alt="轮播图">
+                    <img style="width: 150px;height: 150px; object-fit: scale-down;" :src="scope.row.carouselUrl" alt="轮播图">
                 </template>
             </el-table-column>
             <el-table-column
@@ -72,6 +72,7 @@ import { onMounted, reactive, ref, toRefs } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus, Delete } from '@element-plus/icons-vue'
 import {deleteCarousel, getCarouselList} from "@/service/carousel.js";
+import {deleteFiles} from "@/service/upload.js";
 
 const dialogCarousel = ref()
 const state = reactive({
@@ -130,6 +131,10 @@ const handleDelete = async () => {
         ids: state.multipleSelection.map(i => i.carouselId)
     }
     await deleteCarousel(params)
+    const urlsParams = {
+        urls: state.multipleSelection.map(i => i.carouselUrl)
+    }
+    await deleteFiles(urlsParams)
     ElMessage.success('删除成功')
     await getCarousels()
 }
