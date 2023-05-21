@@ -32,6 +32,38 @@
                 </div>
             </el-card>
         </div>
+        <div class="data">
+            <el-card class="data-item" shadow="hover">
+                <template #header>
+                    <div class="card-header">
+                        <span>支付状态</span>
+                    </div>
+                </template>
+                <div>
+                    {{ state.data.payStatus === 1? '支付成功' : '未支付' }}
+                </div>
+            </el-card>
+            <el-card class="data-item" shadow="hover" v-if="state.data.payStatus === 1">
+                <template #header>
+                    <div class="card-header">
+                        <span>支付方式</span>
+                    </div>
+                </template>
+                <div>
+                    {{ state.data.payTypeString }}
+                </div>
+            </el-card>
+            <el-card class="data-item" shadow="hover">
+                <template #header>
+                    <div class="card-header">
+                        <span>地址</span>
+                    </div>
+                </template>
+                <div>
+                    {{ state.data.userAddress }}
+                </div>
+            </el-card>
+        </div>
         <el-table
                 :data="state.tableData"
                 tooltip-effect="dark"
@@ -41,7 +73,7 @@
                     label="商品图片"
             >
                 <template #default="scope">
-                    <img style="width: 100px" :key="scope.row.goodsId" :src="$filters.prefix(scope.row.goodsCoverImg)" alt="商品主图">
+                    <img style="width: 100px" :key="scope.row.goodsId" :src="scope.row.goodsCoverImg" alt="商品主图">
                 </template>
             </el-table-column>
             <el-table-column
@@ -61,6 +93,12 @@
             <el-table-column
                     prop="sellingPrice"
                     label="价格"
+            >
+            </el-table-column>
+            <el-table-column
+                prop="paidPrice"
+                label="实际付款"
+                v-if="state.data.payStatus === 1"
             >
             </el-table-column>
         </el-table>

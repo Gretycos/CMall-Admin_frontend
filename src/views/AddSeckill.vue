@@ -42,7 +42,7 @@
                             :min-time="getBeginMinTime()"
                             :max-time="state.seckillForm.seckillEndTime"
                             start="09:00"
-                            step="00:15"
+                            step="00:30"
                             end="23:00"
                             format="HH:mm:ss"
                             placeholder="Select time"
@@ -62,10 +62,10 @@
                     <el-form-item prop="seckillEndTime">
                         <el-time-select
                             v-model="state.seckillForm.seckillEndTime"
-                            :min-time="state.seckillForm.seckillBeginTime"
-                            start="09:15"
-                            step="00:15"
-                            end="23:15"
+                            :min-time="getEndMinTime()"
+                            start="09:30"
+                            step="00:30"
+                            end="23:30"
                             format="HH:mm:ss"
                             placeholder="Select time"
                         />
@@ -86,7 +86,6 @@ import {addSeckill, editSeckill, getSeckillDetail} from "@/service/seckill.js";
 import {ElMessage} from "element-plus";
 import {getGoodsDetail} from "@/service/goods.js";
 
-const { proxy } = getCurrentInstance()
 const seckillRef = ref(null)
 const route = useRoute()
 const router = useRouter()
@@ -207,19 +206,35 @@ const disabledStartDate = (time) => {
     return time.getTime() < today.getTime()
 }
 
-// 禁用今天之前以及7天之后的日期
+// 禁用开始时间之前以及7天之后的日期
 const disabledEndDate = (time) => {
-    const today = new Date()
-    today.setDate(today.getDate() - 1)
-    const nextDate = new Date()
-    nextDate.setDate(nextDate.getDate() + 7)
-    return time.getTime() < today.getTime() || time.getTime() > nextDate.getTime()
+    if (state.seckillForm.seckillBeginDate){
+        const startDate = new Date(state.seckillForm.seckillBeginDate)
+        startDate.setDate(startDate.getDate() - 1)
+        const nextDate = new Date(state.seckillForm.seckillBeginDate)
+        nextDate.setDate(nextDate.getDate() + 7)
+        return time.getTime() < startDate.getTime() || time.getTime() > nextDate.getTime()
+    }
+    return true
 }
 
 // 开始的最小时间
 const getBeginMinTime = () => {
-    const now = new Date()
-    return `${now.getHours()}:${now.getMinutes()}`
+    const date = new Date(state.seckillForm.seckillBeginDate)
+    const today = new Date()
+    if (date.getDate() === today.getDate()){
+        return `${today.getHours()}:${today.getMinutes()}`
+    }
+    return ''
+}
+
+const getEndMinTime = () => {
+    if (state.seckillForm.seckillBeginDate && state.seckillForm.seckillEndDate){
+        if (state.seckillForm.seckillBeginDate === state.seckillForm.seckillEndDate){
+            return state.seckillForm.seckillBeginTime
+        }
+    }
+    return ''
 }
 
 

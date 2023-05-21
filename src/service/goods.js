@@ -12,6 +12,10 @@ export function getGoodsDetail(id) {
     return axios.get(`/goods/${id}`)
 }
 
+export function getGoodsName(id) {
+    return axios.get(`/goods/name/${id}`)
+}
+
 export function addGoods(params) {
     return axios.post('/goods', params)
 }
