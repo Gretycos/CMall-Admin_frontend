@@ -3,6 +3,7 @@
             :title="type === 'add' ? '添加轮播图' : '修改轮播图'"
             v-model="state.visible"
             width="400px"
+            @close="close"
     >
         <el-form :model="state.ruleForm" :rules="state.rules" ref="formRef" label-width="100px" class="good-form">
             <el-form-item label="图片" prop="url">

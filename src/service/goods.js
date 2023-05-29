@@ -27,3 +27,7 @@ export function editGoods(params) {
 export function editGoodsStatus(status, params) {
     return axios.put(`/goods/status/${status}`, params)
 }
+
+export function searchAllGoods() {
+    return axios.get('/goods/all')
+}

@@ -27,3 +27,7 @@ export function editCategory(params) {
 export function deleteCategory(params) {
     return axios.post('/categories/delete', params)
 }
+
+export function searchAllLevel3Categories() {
+    return axios.get('/categories/all')
+}

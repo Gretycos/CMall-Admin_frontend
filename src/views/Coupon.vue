@@ -21,7 +21,7 @@
                 <template #default="props">
                     <div v-if="props.row.couponCode">兑换码: {{props.row.couponCode}}</div>
                     <div>商品限制类型: {{props.row.goodsType === 0 ? '全品类' : props.row.goodsType === 1 ? '类目限制' : '商品限制'}}</div>
-                    <div v-if="props.row.goodsValue">商品限制值: {{props.row.goodsValue}}</div>
+                    <div v-if="props.row.goodsValue">商品限制值: {{props.row.goodsValueNames}}</div>
                     <div>创建时间: {{props.row.createTime}}</div>
                     <div v-if="props.row.editTime">修改时间: {{props.row.editTime}}</div>
                 </template>

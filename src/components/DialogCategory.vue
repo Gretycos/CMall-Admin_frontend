@@ -7,6 +7,7 @@
             :title="props.type === 'add' ? '添加分类' : '修改分类'"
             v-model="state.visible"
             width="400px"
+            @close="close"
     >
         <el-form :model="state.ruleForm" :rules="state.rules" ref="formRef" label-width="100px" class="good-form">
             <el-form-item label="商品名称" prop="name">

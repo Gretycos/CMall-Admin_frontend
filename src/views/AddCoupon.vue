@@ -65,10 +65,29 @@
                     </el-radio-group>
                 </el-form-item>
                 <el-alert style="margin-bottom: 10px;" type="info" show-icon :closable="false" v-if="state.couponForm.goodsType === 1">
-                    <p>商品限制值：只能填写第三级分类的id</p>
+                    <p>商品限制值：只能选择第三级分类的id</p>
                 </el-alert>
                 <el-form-item label="商品限制值" prop="goodsValue" v-if="state.couponForm.goodsType !== 0">
-                    <el-input style="width: 300px" v-model="state.couponForm.goodsValue" placeholder="请输入商品限制值（用,隔开）"></el-input>
+                    <el-select
+                        v-model="state.couponForm.goodsValue"
+                        multiple
+                        :multiple-limit="3"
+                        placeholder="请输入选择商品限制值"
+                        style="width: 300px"
+                        filterable
+                        remote
+                        :remote-method="getLimitedValues"
+                        :reserve-keyword="false"
+                        :loading="state.loadingOptions"
+                    >
+                        <el-option
+                            v-for="item in state.options"
+                            :key="item.id"
+                            :label="item.name+', ['+item.id + ']'"
+                            :value="item.id"
+                            :disabled="state.optionDisabled"
+                        />
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="兑换码" prop="couponCode" v-if="state.couponForm.couponType === 2 && state.id">
                     <el-input style="width: 300px" v-model="state.couponForm.couponCode" disabled></el-input>
@@ -85,8 +104,8 @@
 
 import {onMounted, reactive, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
-import {getCategoryDetail} from "@/service/category.js";
-import {getGoodsDetail} from "@/service/goods.js";
+import {searchAllLevel3Categories} from "@/service/category.js";
+import {searchAllGoods} from "@/service/goods.js";
 import {addCoupon, editCoupon, getCouponDetail} from "@/service/coupon.js";
 import {ElMessage} from "element-plus";
 
@@ -103,22 +122,9 @@ const checkGoodsValue = async (rule, value, callback) => {
         callback()
     } else {
         rule.required = 'true'
-        const newValue = value.replace(' ', '')
-        const ids = newValue.split(',')
-        if (ids.length === 0){
-            callback(new Error('请填写至少一个分类'))
+        if (value.length === 0){
+            callback(new Error('请选择至少一项'))
         } else {
-            for (const val of ids) {
-                try {
-                    if (state.couponForm.goodsType === 1){
-                        await getCategoryDetail(val)
-                    } else {
-                        await getGoodsDetail(val)
-                    }
-                } catch (e) {
-                    callback(new Error('请检查输入的商品限制值'))
-                }
-            }
             callback()
         }
     }
@@ -202,9 +208,12 @@ const state = reactive({
             { required: 'true', message: '请选择商品限制类型', trigger: ['change'] },
         ],
         goodsValue: [
-            { validator: checkGoodsValue, message: '请填写商品限制值', trigger: ['blur'] },
+            { validator: checkGoodsValue, message: '请选择商品限制值', trigger: ['blur'] },
         ],
-    }
+    },
+    options: [],
+    optionDisabled: false,
+    loadingOptions: false
 })
 
 onMounted(async () => {
@@ -222,8 +231,25 @@ onMounted(async () => {
             couponType: data.couponType,
             couponStatus: data.couponStatus,
             goodsType: data.goodsType,
-            goodsValue: data.goodsValue,
+            goodsValue: data.goodsValue.split(','),
             couponCode: data.couponCode
+        }
+        if (state.couponForm.goodsType === 1){
+            const{data} = await searchAllLevel3Categories()
+            state.options = data.map(e => {
+                return {
+                    id: e.categoryId+'',
+                    name: e.categoryName
+                }
+            })
+        } else if (state.couponForm.goodsType === 2){
+            const{data} = await searchAllGoods()
+            state.options = data.map(e => {
+                return {
+                    id: e.goodsId+'',
+                    name: e.goodsName
+                }
+            })
         }
     }
 })
@@ -243,7 +269,7 @@ const submitAdd = () => {
                 couponType: state.couponForm.couponType,
                 couponStatus: state.couponForm.couponStatus,
                 goodsType: state.couponForm.goodsType,
-                goodsValue: state.couponForm.goodsValue,
+                goodsValue: state.couponForm.goodsValue.join(','),
                 couponCode: state.couponForm.couponCode
             }
             if (id) {
@@ -265,6 +291,36 @@ const getDisabledStartTime = (date) => {
 
 const getDisabledEndTime = (date) => {
     return date.getTime() <= new Date(state.couponForm.couponStartTime).getTime()
+}
+
+const getLimitedValues = async (query) => {
+    state.loadingOptions = true
+    if (query){
+        if (state.couponForm.goodsType !== 0){
+            state.options = state.options.filter(e => {
+                return e.name.includes(query)
+            })
+        }
+    } else {
+        if (state.couponForm.goodsType === 1){
+            const{data} = await searchAllLevel3Categories()
+            state.options = data.map(e => {
+                return {
+                    id: e.categoryId+'',
+                    name: e.categoryName
+                }
+            })
+        } else if (state.couponForm.goodsType === 2){
+            const {data} = await searchAllGoods()
+            state.options = data.map(e => {
+                return {
+                    id: e.goodsId+'',
+                    name: e.goodsName
+                }
+            })
+        }
+    }
+    state.loadingOptions = false
 }
 </script>
 
