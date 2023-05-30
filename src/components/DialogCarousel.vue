@@ -6,24 +6,32 @@
             @close="close"
     >
         <el-form :model="state.ruleForm" :rules="state.rules" ref="formRef" label-width="100px" class="good-form">
-            <el-form-item label="图片" prop="url">
-                <el-upload
-                        class="avatar-uploader"
-                        :action="state.uploadImgServer"
-                        accept="jpg,jpeg,png"
-                        :headers="{
-                          token: state.token
-                        }"
-                        :show-file-list="false"
-                        :before-upload="handleBeforeUpload"
-                        :on-success="handleUrlSuccess"
+            <el-form-item label="商品" prop="goods">
+                <el-select
+                    v-model="state.goodsId"
+                    placeholder="请选择商品"
+                    style="width: 300px"
+                    filterable
+                    remote
+                    :disabled="!!state.id"
+                    :remote-method="remoteSearch"
+                    :reserve-keyword="false"
+                    :loading="state.loadingOptions"
+                    @change="changeSelect"
                 >
-                    <img style="width: 200px; height: 100px; border: 1px solid #e9e9e9; object-fit: contain;" v-if="state.ruleForm.url" :src="state.ruleForm.url" class="avatar">
-                    <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-                </el-upload>
+                    <el-option
+                        v-for="item in state.options"
+                        :key="item.id"
+                        :label="item.name+', ['+item.id + ']'"
+                        :value="item.id"
+                    />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="图片" prop="url">
+                <img style="height: 120px;" :src="state.ruleForm.url" />
             </el-form-item>
             <el-form-item label="跳转链接" prop="link">
-                <el-input type="text" v-model="state.ruleForm.link"></el-input>
+                <el-input type="text" v-model="state.ruleForm.link" disabled></el-input>
             </el-form-item>
             <el-form-item label="排序值" prop="sort">
                 <el-input type="number" v-model="state.ruleForm.sort"></el-input>
@@ -39,23 +47,21 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import {reactive, ref} from 'vue'
 import { ElMessage } from 'element-plus'
-import {getLocal, uploadImgServer} from "@/common/js/utils.js";
 import {addCarousel, editCarousel, getCarouselDetail} from "@/service/carousel.js";
-import {deleteFiles} from "@/service/upload.js";
+import {getGoodsCarousel, searchAllGoodsIdsAndNames} from "@/service/goods.js";
 
 const props = defineProps({
     type: String,
     reload: Function
 })
-let urlOrigin = []
-let urlHistory = []
-let urlCurrent = []
 const formRef = ref(null)
 const state = reactive({
-    uploadImgServer,
-    token: getLocal('token') || '',
+    id: '',
+    goodsId: '',
+    options: [],
+    loadingOptions: false,
     visible: false,
     ruleForm: {
         url: '',
@@ -73,55 +79,45 @@ const state = reactive({
             { required: 'true', message: '排序不能为空', trigger: ['change'] }
         ]
     },
-    id: ''
 })
 // 获取详情
 const getDetail = async (id) => {
-    const {data} = getCarouselDetail(id)
+    const {data} = await getCarouselDetail(id)
     state.ruleForm = {
         url: data.carouselUrl,
         link: data.redirectUrl,
         sort: data.carouselRank
     }
-    urlOrigin = [data.carouselUrl]
-    urlHistory = [data.carouselUrl]
-}
-
-const handleBeforeUpload = (file) => {
-    const suffix = file.name.split('.')[1] || ''
-    if (!['jpg', 'jpeg', 'png'].includes(suffix)) {
-        ElMessage.error('请上传 jpg、jpeg、png 格式的图片')
-        return false
-    }
-}
-
-// 上传图片
-const handleUrlSuccess = (val) => {
-    state.ruleForm.url = val.data || ''
-    urlHistory.push(val.data)
+    state.goodsId = data.redirectUrl.substring(data.redirectUrl.lastIndexOf('/') + 1)
 }
 
 // 开启弹窗
-const open = (id) => {
+const open = async (id) => {
     state.visible = true
+    const {data} = await searchAllGoodsIdsAndNames()
+    state.options = data.map(e => {
+        return {
+            id: e.goodsId+'',
+            name: e.goodsName
+        }
+    })
     if (id) {
         state.id = id
-        getDetail(id)
+        await getDetail(id)
     } else {
         state.ruleForm = {
             url: '',
             link: '',
             sort: ''
         }
-        urlOrigin = []
-        urlHistory = []
     }
 }
 
 // 关闭弹窗
 const close = async () => {
     state.visible = false
-    await deleteUrlUnsaved()
+    state.id = ''
+    state.goodsId = ''
 }
 
 const submitForm = () => {
@@ -140,35 +136,35 @@ const submitForm = () => {
                 await editCarousel(params)
                 ElMessage.success('修改成功')
             }
-            await deleteUrlDiff()
             state.visible = false
             if (props.reload) props.reload()
         }
     })
 }
 
-const deleteUrlUnsaved = async () => {
-    const urlUnsaved = urlHistory.filter(v => !urlOrigin.includes(v))
-    console.log(urlUnsaved)
-    if (urlUnsaved.length > 0){
-        const params = {
-            urls: urlUnsaved
-        }
-        await deleteFiles(params)
+const remoteSearch = async (query) => {
+    state.loadingOptions = true
+    if (query){
+        state.options = state.options.filter(e => {
+            return e.name.includes(query)
+        })
+    } else {
+        const {data} = await searchAllGoodsIdsAndNames()
+        state.options = data.map(e => {
+            return {
+                id: e.goodsId+'',
+                name: e.goodsName
+            }
+        })
     }
+    state.loadingOptions = false
 }
 
-const deleteUrlDiff = async () => {
-    urlCurrent = [state.ruleForm.url]
-    const urlDiff = urlHistory.concat(urlCurrent).filter(v => urlHistory.includes(v) && !urlCurrent.includes(v))
-    // console.log(carouselDiff)
-    if (urlDiff.length > 0){
-        const params = {
-            urls: urlDiff
-        }
-        await deleteFiles(params)
-    }
-    urlOrigin = urlHistory = urlCurrent
+const changeSelect = async (val) => {
+    console.log(val)
+    const {data} = await getGoodsCarousel(val)
+    state.ruleForm.url = data.goodsCarousel.split(',')[0]
+    state.ruleForm.link = '/product/' + data.goodsId
 }
 
 defineExpose({ open, close })

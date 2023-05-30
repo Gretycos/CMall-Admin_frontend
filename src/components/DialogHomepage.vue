@@ -2,17 +2,37 @@
     <el-dialog
             :title="type === 'add' ? '添加商品' : '修改商品'"
             v-model="state.visible"
+            @close="close"
             width="400px"
     >
         <el-form :model="state.ruleForm" :rules="state.rules" ref="formRef" label-width="100px" class="good-form">
             <el-form-item label="商品编号" prop="id">
-                <el-input type="number" v-model="state.ruleForm.id"></el-input>
+                <el-select
+                    v-model="state.goods"
+                    value-key="id"
+                    placeholder="请选择商品"
+                    style="width: 300px"
+                    filterable
+                    remote
+                    :disabled="!!state.id"
+                    :remote-method="remoteSearch"
+                    :reserve-keyword="false"
+                    :loading="state.loadingOptions"
+                    @change="changeSelect"
+                >
+                    <el-option
+                        v-for="item in state.options"
+                        :key="item.id"
+                        :label="item.name+', ['+item.id + ']'"
+                        :value="item"
+                    />
+                </el-select>
             </el-form-item>
             <el-form-item label="商品名称" prop="name">
                 <el-input type="text" v-model="state.ruleForm.name" disabled></el-input>
             </el-form-item>
             <el-form-item label="跳转链接" prop="link">
-                <el-input type="text" v-model="state.ruleForm.link"></el-input>
+                <el-input type="text" v-model="state.ruleForm.link" disabled></el-input>
             </el-form-item>
             <el-form-item label="排序值" prop="sort">
                 <el-input type="number" v-model="state.ruleForm.sort"></el-input>
@@ -31,7 +51,7 @@
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import {addHomepage, editHomepage, getHomepageDetail} from "@/service/homepage.js";
-import {getGoodsName} from "@/service/goods.js";
+import {getGoodsName, searchAllGoodsIdsAndNames} from "@/service/goods.js";
 
 const props = defineProps({
     type: String,
@@ -40,24 +60,12 @@ const props = defineProps({
 })
 const formRef = ref(null)
 
-const checkId = async (rule, val, callback) => {
-    if (state.id){
-        callback()
-    }else{
-        try{
-            const {data} = await getGoodsName(val)
-            state.ruleForm.name = data.goodsName
-            callback()
-        }catch (e){
-            state.ruleForm.name = ''
-            callback(new Error('商品编码不存在'))
-        }
-    }
-
-}
-
 const state = reactive({
+    id: '',
     visible: false,
+    goods: null,
+    options: [],
+    loadingOptions: false,
     ruleForm: {
         id: '',
         name: '',
@@ -67,13 +75,11 @@ const state = reactive({
     rules: {
         id: [
             { required: 'true', message: '商品编号不能为空', trigger: ['change'] },
-            { validator: checkId, trigger: ['blur']}
         ],
         sort: [
             { required: 'true', message: '排序不能为空', trigger: ['change'] }
         ]
-    },
-    id: ''
+    }
 })
 // 获取详情
 const getDetail = async (id) => {
@@ -84,14 +90,25 @@ const getDetail = async (id) => {
         link: data.redirectUrl,
         sort: data.configRank
     }
+    state.goods = {
+        id: data.goodsId,
+        name: data.configName
+    }
 }
 
 // 开启弹窗
-const open = (id) => {
+const open = async (id) => {
     state.visible = true
+    const {data} = await searchAllGoodsIdsAndNames()
+    state.options = data.map(e => {
+        return {
+            id: e.goodsId,
+            name: e.goodsName
+        }
+    })
     if (id) {
         state.id = id
-        getDetail(id)
+        await getDetail(id)
     } else {
         state.ruleForm = {
             name: '',
@@ -105,6 +122,8 @@ const open = (id) => {
 // 关闭弹窗
 const close = () => {
     state.visible = false
+    state.id = ''
+    state.goods = null
 }
 
 // 提交表单
@@ -130,6 +149,30 @@ const submitForm = () => {
             if (props.reload) props.reload()
         }
     })
+}
+
+const remoteSearch = async (query) => {
+    state.loadingOptions = true
+    if (query){
+        state.options = state.options.filter(e => {
+            return e.name.includes(query)
+        })
+    } else {
+        const {data} = await searchAllGoodsIdsAndNames()
+        state.options = data.map(e => {
+            return {
+                id: e.goodsId,
+                name: e.goodsName
+            }
+        })
+    }
+    state.loadingOptions = false
+}
+
+const changeSelect = async (val) => {
+    state.ruleForm.id = val.id
+    state.ruleForm.link = '/product/' + val.id
+    state.ruleForm.name = val.name
 }
 
 defineExpose({ open, close })

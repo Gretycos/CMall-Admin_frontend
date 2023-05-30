@@ -14,9 +14,9 @@ export const removeLocal = (name) => {
     localStorage.removeItem(name)
 }
 
-export const uploadImgServer = '/api/upload/file'
+export const uploadImgServer = '/api/admin/upload/file'
 
-export const uploadImgsServer = '/api/upload/files'
+export const uploadImgsServer = '/api/admin/upload/files'
 
 export const pathMap = {
     login: '登录',

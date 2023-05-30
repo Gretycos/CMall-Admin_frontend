@@ -47,7 +47,7 @@
             <el-table-column
                     prop="goodsId"
                     label="商品编号"
-                    width="200"
+                    width="120"
             >
             </el-table-column>
             <el-table-column

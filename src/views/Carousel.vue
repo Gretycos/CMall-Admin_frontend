@@ -53,6 +53,14 @@
                     width="200"
             >
             </el-table-column>
+            <el-table-column
+                label="操作"
+                width="100"
+            >
+                <template #default="scope">
+                    <a style="cursor: pointer; margin-right: 10px" @click="handleEdit(scope.row.carouselId)">修改</a>
+                </template>
+            </el-table-column>
         </el-table>
         <el-pagination
                 background
@@ -70,7 +78,7 @@
 import DialogCarousel from "@/components/DialogCarousel.vue";
 import { onMounted, reactive, ref, toRefs } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Plus, Delete } from '@element-plus/icons-vue'
+import {Plus, Delete, Edit} from '@element-plus/icons-vue'
 import {deleteCarousel, getCarouselList} from "@/service/carousel.js";
 import {deleteFiles} from "@/service/upload.js";
 
@@ -131,10 +139,6 @@ const handleDelete = async () => {
         ids: state.multipleSelection.map(i => i.carouselId)
     }
     await deleteCarousel(params)
-    const urlsParams = {
-        urls: state.multipleSelection.map(i => i.carouselUrl)
-    }
-    await deleteFiles(urlsParams)
     ElMessage.success('删除成功')
     await getCarousels()
 }

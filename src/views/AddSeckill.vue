@@ -3,7 +3,24 @@
         <el-card class="add-container">
             <el-form :model="state.seckillForm" :rules="state.rules" ref="seckillRef" label-width="100px" class="seckillForm">
                 <el-form-item label="商品编码" prop="goodsId">
-                    <el-input style="width: 300px" v-model="state.seckillForm.goodsId" :disabled="!!id"></el-input>
+                    <el-select
+                        v-model="state.seckillForm.goodsId"
+                        placeholder="请选择商品"
+                        style="width: 300px"
+                        filterable
+                        remote
+                        :disabled="!!id"
+                        :remote-method="remoteSearch"
+                        :reserve-keyword="false"
+                        :loading="state.loadingOptions"
+                    >
+                        <el-option
+                            v-for="item in state.options"
+                            :key="item.id"
+                            :label="item.name+', ['+item.id + ']'"
+                            :value="item.id"
+                        />
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="商品名称" prop="goodsName">
                     <el-input style="width: 300px" v-model="state.seckillForm.goodsName" disabled></el-input>
@@ -80,11 +97,11 @@
 </template>
 
 <script setup>
-import {getCurrentInstance, onMounted, reactive, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {addSeckill, editSeckill, getSeckillDetail} from "@/service/seckill.js";
 import {ElMessage} from "element-plus";
-import {getGoodsDetail} from "@/service/goods.js";
+import {getGoodsDetail, searchAllGoodsIdsAndNames} from "@/service/goods.js";
 
 const seckillRef = ref(null)
 const route = useRoute()
@@ -109,6 +126,8 @@ const checkGoodsId = async (rule, value, callback) => {
 }
 const state = reactive({
     id: id,
+    loadingOptions: false,
+    options: [],
     seckillForm: {
         goodsId: '',
         goodsName: '',
@@ -171,7 +190,32 @@ onMounted(async () => {
             seckillEndTime: data.seckillEnd.split(' ')[1]
         }
     }
+    const {data} = await searchAllGoodsIdsAndNames()
+    state.options = data.map(e => {
+        return {
+            id: e.goodsId+'',
+            name: e.goodsName
+        }
+    })
 })
+
+const remoteSearch = async (query) => {
+    state.loadingOptions = true
+    if (query){
+        state.options = state.options.filter(e => {
+            return e.name.includes(query)
+        })
+    } else {
+        const {data} = await searchAllGoodsIdsAndNames()
+        state.options = data.map(e => {
+            return {
+                id: e.goodsId+'',
+                name: e.goodsName
+            }
+        })
+    }
+    state.loadingOptions = false
+}
 
 const submitAdd = () => {
     seckillRef.value.validate( async (valid) => {

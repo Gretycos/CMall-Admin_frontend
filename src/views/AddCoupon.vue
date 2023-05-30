@@ -24,7 +24,7 @@
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="类型" prop="couponType">
-                    <el-radio-group v-model="state.couponForm.couponType">
+                    <el-radio-group v-model="state.couponForm.couponType" :disabled="state.id && state.couponForm.couponType === 2">
                         <el-radio :label="0">通用券</el-radio>
                         <el-radio :label="1">注册赠送</el-radio>
                         <el-radio :label="2">兑换券</el-radio>
@@ -72,11 +72,11 @@
                         v-model="state.couponForm.goodsValue"
                         multiple
                         :multiple-limit="3"
-                        placeholder="请输入选择商品限制值"
+                        placeholder="请选择商品限制值"
                         style="width: 300px"
                         filterable
                         remote
-                        :remote-method="getLimitedValues"
+                        :remote-method="remoteSearch"
                         :reserve-keyword="false"
                         :loading="state.loadingOptions"
                     >
@@ -85,7 +85,6 @@
                             :key="item.id"
                             :label="item.name+', ['+item.id + ']'"
                             :value="item.id"
-                            :disabled="state.optionDisabled"
                         />
                     </el-select>
                 </el-form-item>
@@ -105,7 +104,7 @@
 import {onMounted, reactive, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {searchAllLevel3Categories} from "@/service/category.js";
-import {searchAllGoods} from "@/service/goods.js";
+import {searchAllGoodsIdsAndNames} from "@/service/goods.js";
 import {addCoupon, editCoupon, getCouponDetail} from "@/service/coupon.js";
 import {ElMessage} from "element-plus";
 
@@ -170,7 +169,7 @@ const state = reactive({
         couponType: 0,
         couponStatus: 0,
         goodsType: 0,
-        goodsValue: '',
+        goodsValue: [],
         couponCode: ''
     },
     rules: {
@@ -212,7 +211,6 @@ const state = reactive({
         ],
     },
     options: [],
-    optionDisabled: false,
     loadingOptions: false
 })
 
@@ -231,7 +229,7 @@ onMounted(async () => {
             couponType: data.couponType,
             couponStatus: data.couponStatus,
             goodsType: data.goodsType,
-            goodsValue: data.goodsValue.split(','),
+            goodsValue: data.goodsValue.split(',').filter(e => e !== ''),
             couponCode: data.couponCode
         }
         if (state.couponForm.goodsType === 1){
@@ -243,7 +241,7 @@ onMounted(async () => {
                 }
             })
         } else if (state.couponForm.goodsType === 2){
-            const{data} = await searchAllGoods()
+            const{data} = await searchAllGoodsIdsAndNames()
             state.options = data.map(e => {
                 return {
                     id: e.goodsId+'',
@@ -293,7 +291,7 @@ const getDisabledEndTime = (date) => {
     return date.getTime() <= new Date(state.couponForm.couponStartTime).getTime()
 }
 
-const getLimitedValues = async (query) => {
+const remoteSearch = async (query) => {
     state.loadingOptions = true
     if (query){
         if (state.couponForm.goodsType !== 0){
@@ -311,7 +309,7 @@ const getLimitedValues = async (query) => {
                 }
             })
         } else if (state.couponForm.goodsType === 2){
-            const {data} = await searchAllGoods()
+            const {data} = await searchAllGoodsIdsAndNames()
             state.options = data.map(e => {
                 return {
                     id: e.goodsId+'',

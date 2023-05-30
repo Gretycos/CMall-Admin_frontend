@@ -139,6 +139,7 @@ const open = (id) => {
 // 关闭弹窗
 const close = () => {
     state.visible = false
+    state.id = ''
 }
 
 // defineExpose暴露属性出去，才能用ref在父组件拿到组件内部属性

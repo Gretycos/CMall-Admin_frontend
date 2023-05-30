@@ -12,6 +12,10 @@ export function getGoodsDetail(id) {
     return axios.get(`/goods/${id}`)
 }
 
+export function getGoodsCarousel(id) {
+    return axios.get(`/goods/carousel/${id}`)
+}
+
 export function getGoodsName(id) {
     return axios.get(`/goods/name/${id}`)
 }
@@ -28,6 +32,6 @@ export function editGoodsStatus(status, params) {
     return axios.put(`/goods/status/${status}`, params)
 }
 
-export function searchAllGoods() {
+export function searchAllGoodsIdsAndNames() {
     return axios.get('/goods/all')
 }
