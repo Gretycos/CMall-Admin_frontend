@@ -27,10 +27,12 @@
 
 <script setup>
 import md5 from 'js-md5'
+import {useRouter} from "vue-router";
 import { reactive, ref } from 'vue'
 import {login} from "@/service/adminUser.js";
 import {setLocal} from "@/common/js/utils.js";
 
+const router = useRouter()
 const loginForm = ref(null)
 const state = reactive({
     ruleForm: {
@@ -55,9 +57,8 @@ const submitForm = () => {
                 userName: state.ruleForm.username || '',
                 passwordMd5: md5(state.ruleForm.password)
             }
-            const {data} = await login(params)
-            setLocal('token', data)
-            window.location.href = '/'
+            await login(params)
+            await router.push('/')
         } else {
             console.log('error submit!!')
             return false

@@ -59,6 +59,7 @@ const getUserInfo = async () => {
 const logout = async () => {
     await logoutAdmin()
     removeLocal('token')
+    router.go(0)
     // 回到登录页
     await router.push({path: '/login'})
 }

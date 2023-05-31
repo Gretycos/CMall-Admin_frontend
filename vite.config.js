@@ -22,7 +22,7 @@ export default defineConfig({
             '@': path.resolve(__dirname, 'src')
         }
     },
-    base: './',
+    base: '/admin',
     server: {
         proxy: {
             '/api/admin': {
