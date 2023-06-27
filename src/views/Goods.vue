@@ -132,7 +132,9 @@ const handleStatus = async (id, status) => {
     }
     await editGoodsStatus(status, params)
     ElMessage.success('修改成功')
-    await getGoods()
+    setTimeout(() => {
+        getGoods()
+    }, 1000)
 }
 
 </script>

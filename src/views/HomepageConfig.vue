@@ -174,7 +174,9 @@ const handleDelete = async () => {
     }
     await deleteHomepage(params)
     ElMessage.success('删除成功')
-    await getHomepageConfig()
+    setTimeout(() => {
+        getHomepageConfig()
+    }, 1500)
 }
 
 // 单个删除
@@ -184,7 +186,9 @@ const handleDeleteOne = async (id) => {
     }
     await deleteHomepage(params)
     ElMessage.success('删除成功')
-    await getHomepageConfig()
+    setTimeout(() => {
+        getHomepageConfig()
+    }, 1500)
 }
 
 const changePage = (val) => {

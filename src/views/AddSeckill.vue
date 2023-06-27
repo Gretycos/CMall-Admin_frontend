@@ -238,7 +238,9 @@ const submitAdd = () => {
                 await addSeckill(params)
                 ElMessage.success('添加成功')
             }
-            await router.push({path: '/seckill'})
+            setTimeout(() => {
+                router.push({path: '/seckill'})
+            },1000)
         }
     })
 }

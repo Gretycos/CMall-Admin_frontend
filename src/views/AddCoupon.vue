@@ -278,7 +278,9 @@ const submitAdd = () => {
                 await addCoupon(params)
                 ElMessage.success('添加成功')
             }
-            await router.push({path: '/coupon'})
+            setTimeout(() => {
+                router.push({path: '/coupon'})
+            }, 1000)
         }
     })
 }

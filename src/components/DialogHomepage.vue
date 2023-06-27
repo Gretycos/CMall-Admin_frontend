@@ -145,8 +145,10 @@ const submitForm = () => {
                 await editHomepage(params)
                 ElMessage.success('修改成功')
             }
-            state.visible = false
-            if (props.reload) props.reload()
+            setTimeout(() => {
+                state.visible = false
+                if (props.reload) props.reload()
+            }, 1000)
         }
     })
 }

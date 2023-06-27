@@ -218,7 +218,9 @@ const handleConfig = async (id) => {
     }
     await checkDoneOrder(params)
     ElMessage.success('配货成功')
-    await getOrders()
+    setTimeout(() => {
+        getOrders()
+    }, 1000)
 }
 
 // 出库方法
@@ -237,7 +239,9 @@ const handleSend = async (id) => {
     }
     await checkOutOrder(params)
     ElMessage.success('出库成功')
-    await getOrders()
+    setTimeout(() => {
+        getOrders()
+    }, 1000)
 }
 
 // 关闭订单方法
@@ -256,7 +260,9 @@ const handleClose = async (id) => {
     }
     await closeOrder(params)
     ElMessage.success('关闭成功')
-    await getOrders()
+    setTimeout(() => {
+        getOrders()
+    }, 1000)
 }
 </script>
 

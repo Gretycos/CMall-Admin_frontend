@@ -273,7 +273,9 @@ const submitAdd = () => {
             await deleteImgsDiff()
             await deleteCoversDiff()
             await deleteCarouselDiff()
-            await router.push({path: '/goods'})
+            setTimeout(() => {
+                router.push({path: '/goods'})
+            },1000)
         }
     })
 }

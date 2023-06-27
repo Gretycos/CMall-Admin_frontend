@@ -14,7 +14,6 @@
             style="width: 100%"
             :stripe="true"
             :border="true"
-            table-layout="auto"
             @current-change="handleCurrentChange"
         >
             <el-table-column type="expand">
@@ -37,6 +36,7 @@
             <el-table-column
                 prop="couponName"
                 label="优惠券名称"
+                header-align="center"
                 width="100%"
                 align="center"
             >

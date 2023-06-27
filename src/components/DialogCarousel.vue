@@ -136,8 +136,10 @@ const submitForm = () => {
                 await editCarousel(params)
                 ElMessage.success('修改成功')
             }
-            state.visible = false
-            if (props.reload) props.reload()
+            setTimeout(()=>{
+                state.visible = false
+                if (props.reload) props.reload()
+            }, 1000)
         }
     })
 }
@@ -161,7 +163,7 @@ const remoteSearch = async (query) => {
 }
 
 const changeSelect = async (val) => {
-    console.log(val)
+    // console.log(val)
     const {data} = await getGoodsCarousel(val)
     state.ruleForm.url = data.goodsCarousel.split(',')[0]
     state.ruleForm.link = '/product/' + data.goodsId

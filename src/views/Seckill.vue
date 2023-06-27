@@ -188,7 +188,9 @@ const handleDelete = (id, status) => {
         } else {
             await deleteSeckill(id)
             ElMessage.success('删除成功')
-            await getSeckill()
+            setTimeout(() => {
+                getSeckill()
+            }, 1000)
         }
     }).catch( () => {
         ElMessage.info('取消删除操作')

@@ -196,7 +196,9 @@ const handleDelete = async () => {
     }
     await deleteCategory(params)
     ElMessage.success('删除成功')
-    await getCategory()
+    setTimeout(() => {
+        getCategory()
+    }, 1500)
 }
 
 // 单个删除

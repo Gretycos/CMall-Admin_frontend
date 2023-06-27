@@ -84,34 +84,27 @@ const getDetail = async (id) => {
 const submitForm = () => {
     formRef.value.validate(async (valid) => {
         if (valid) {
+            let params = {
+                categoryLevel: state.categoryLevel,
+                parentId: state.parentId,
+                categoryName: state.ruleForm.name,
+                categoryRank: state.ruleForm.rank
+            }
             if (props.type === 'add') {
-                // 添加方法
-                const params = {
-                    categoryLevel: state.categoryLevel,
-                    parentId: state.parentId,
-                    categoryName: state.ruleForm.name,
-                    categoryRank: state.ruleForm.rank
-                }
                 await addCategory(params)
                 ElMessage.success('添加成功')
-                state.visible = false
-                // 接口回调之后，运行重新获取列表方法 reload
-                if (props.reload) props.reload()
+
             } else {
                 // 修改方法
-                const params = {
-                    categoryId: state.id,
-                    categoryLevel: state.categoryLevel,
-                    parentId: state.parentId,
-                    categoryName: state.ruleForm.name,
-                    categoryRank: state.ruleForm.rank
-                }
+                params.categoryId = state.id
                 await editCategory(params)
                 ElMessage.success('修改成功')
+            }
+            setTimeout(() => {
                 state.visible = false
                 // 接口回调之后，运行重新获取列表方法 reload
                 if (props.reload) props.reload()
-            }
+            }, 1000)
         }
     })
 }

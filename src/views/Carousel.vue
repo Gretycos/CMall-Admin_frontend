@@ -140,7 +140,9 @@ const handleDelete = async () => {
     }
     await deleteCarousel(params)
     ElMessage.success('删除成功')
-    await getCarousels()
+    setTimeout(() => {
+        getCarousels()
+    }, 1500)
 }
 
 const changePage = (val) => {

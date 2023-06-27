@@ -107,7 +107,9 @@ const submitName = () => {
             }
             await editName(params)
             ElMessage.success('修改成功')
-            window.location.reload()
+            setTimeout(() => {
+                window.location.reload()
+            }, 1500)
         }
     })
 }
@@ -121,7 +123,9 @@ const submitPass = () => {
             }
             await editPassword(params)
             ElMessage.success('修改成功')
-            window.location.reload()
+            setTimeout(() => {
+                window.location.reload()
+            }, 1000)
         }
     })
 }

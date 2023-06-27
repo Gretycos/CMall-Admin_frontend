@@ -47,12 +47,14 @@ const getList = async () => {
             pageNumber: state.currentPage,
             pageSize: state.pageSize
         }
-        const {data} = await getMallUser(params)
-        state.tableData = data.list
-        state.total = data.totalCount
-        state.currentPage = data.currPage
-        state.loading = false
-        goTop && goTop() // 回到顶部
+        setTimeout(async () => {
+            const {data} = await getMallUser(params)
+            state.tableData = data.list
+            state.total = data.totalCount
+            state.currentPage = data.currPage
+            state.loading = false
+            goTop && goTop() // 回到顶部
+        }, 1500)
     }
 }
 
